@@ -47,7 +47,7 @@ def parse_job(xmlstr):
         # (re)init arg list
         arg_list = []; 
         
-        # make sure the xml specifiy proper shit
+        # make sure the xml specify proper shit
         if not 'name' in job.attrib.keys() :
             raise JobParserException('xml job specification did not contain name attribute.');
         
@@ -126,7 +126,7 @@ class WorkerThread(threading.Thread):
     def run(self):
         
         try:
-            print "Thread ",self.name,' is starting ...';
+            #print "Thread ",self.name,' is starting ...';
             
             # do this forever ...
             while True:
@@ -390,13 +390,13 @@ class JobDeamon():
             
         try:
             # initialization the host name
-            if self.reflection.public_hostname == None:
+            if self.reflection.public_hostname is None:
                 stats = os.uname()[1]+':'; 
             else:
-                stats = "%-45s %12s  %6.3f" % (                                   \
-                                               self.reflection.public_hostname   ,\
-                                               self.reflection.instance_type     ,\
-                                               self.reflection.current_spot_price \
+                stats = "%-45s %12s  %6.3f" % (
+                                               self.reflection.public_hostname   ,
+                                               self.reflection.instance_type     ,
+                                               self.reflection.current_spot_price
                                               );
                 
             # figure out how many jobs have been executed
@@ -418,10 +418,10 @@ class JobDeamon():
             jph = ( 3600.0/float(avg_exe_time) ) * self.num_threads;
 
             # add the execution metadata to the stats
-            stats += '  %s  %5d  %4.1f%s %6.1f\n' % ( uptime                , \
-                                                      total_job_count       , \
-                                                      avg_exe_time_str      , \
-                                                      exe_unit[0]           , \
+            stats += '  %s  %5d  %4.1f%s %6.1f\n' % ( uptime                ,
+                                                      total_job_count       ,
+                                                      avg_exe_time_str      ,
+                                                      exe_unit[0]           ,
                                                       jph                     )
             
             # start the job counter
@@ -527,6 +527,9 @@ def main():
         
         # init
         scheduler = JobDeamon(num_threads);
+
+        # comfort signal
+        os.sys.stdout.write('Starting scheduler with '+str(num_threads)+'\n');
         
         # do the damn thing 
         scheduler.start();
