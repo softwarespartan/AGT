@@ -128,7 +128,7 @@ class WorkerThread(threading.Thread):
             self.errQueue.write(error_message);
         
     
-    # @Override
+    # Override
     def run(self):
         
         try:
@@ -157,18 +157,18 @@ class WorkerThread(threading.Thread):
                     except Exception as e:
                         os.sys.stderr.write(str(e)+'\n');
                         #raise InfrastructureException('error handling message: '+msg[0]);
-                        self.publish_error('run@handle_message: '+str(e));
+                        self.publish_error('runhandle_message: '+str(e));
                     
                 except Exception as e:
                         os.sys.stderr.write(str(e)+'\n');
                         #raise InfrastructureException('error in run loop for message: '+msg[0]);
-                        self.publish_error('run@while: '+str(e));
+                        self.publish_error('runwhile: '+str(e));
                         
                 
         except Exception as e:
             os.sys.stderr.write(str(e)+'\n');
             #raise InfrastructureException('error in thread '+self.name+' while running '+msg[0]);
-            self.publish_error('run@: '+str(e));
+            self.publish_error('run: '+str(e));
     
                 
     def handle_message(self,message):
@@ -182,7 +182,7 @@ class WorkerThread(threading.Thread):
             os.sys.stderr.write(str(e)+'\n'); 
             
             # loog error message
-            self.publish_error('handle_message@parse_job: '+str(e));
+            self.publish_error('handle_messageparse_job: '+str(e));
             
             # for now, lets remove the message from the jobQueue
             self.jobQueue.delete_message(message);
@@ -235,7 +235,7 @@ class WorkerThread(threading.Thread):
             os.sys.stderr.write(str(e)+'\n'); 
             
             # loog error message
-            self.publish_error('handle_message@exe: '+str(e));
+            self.publish_error('handle_messageexe: '+str(e));
                 
         finally:
             # stop the message lease renewal timer
@@ -452,15 +452,17 @@ class JobDeamon():
                 i = i + 1;
                 
         except Exception as e:
-            
+
+            os.sys.stderr('ERROR computing node_stats()\n');
+
             # blab about the problem on cmd line
-            os.sys.stderr.write(str(e));
+            os.sys.stderr.write(str(e)+'\n');
             
             # note the situation in the status
-            stats += 'ERROR: '+str(e)+'\n';
+            stats = 'ERROR: '+str(e)+'\n';
             
             # log error message to the error queue
-            self.publish_error('publish_node_stats@: '+str(e));
+            self.publish_error('publish_node_stats: '+str(e));
           
         finally:
             # all done folks
@@ -494,7 +496,7 @@ class JobDeamon():
             os.sys.stderr.write(str(e)+'\n');
             
             # log error message to the error queue
-            self.publish_error('publish_node_stats@: '+str(e));
+            self.publish_error('publish_node_stats: '+str(e));
 
     def publish_error(self,err_str):
 
