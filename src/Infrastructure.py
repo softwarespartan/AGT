@@ -179,7 +179,7 @@ class WorkerThread(threading.Thread):
         except Exception as e:
             
             # blab about the problem to standard error
-            os.sys.stderr.write(str(e)+'\n'); 
+            os.sys.stderr.write('handle_message/parse_job(message.get_body())'+str(e)+'\n');
             
             # log error message
             self.publish_error('handle_messageparse_job: '+str(e));
@@ -192,7 +192,7 @@ class WorkerThread(threading.Thread):
         
         # make sure we have something to work with before we proceed
         if len(job_dict.keys()) == 0:
-            os.sys.stderr.write(' job_dict.keys() has zero length ... \n');
+            os.sys.stderr.write(' handle_message:job_dict.keys() has zero length ... \n');
             self.jobQueue.delete_message(message);
             return;
         
@@ -393,7 +393,11 @@ class JobDeamon():
             
         return avg_job_exe_time;
   
-    def node_stats(self): 
+    def node_stats(self):
+
+        stats = '';
+
+        os.sys.stderr.write('computing node stats ... \n');
             
         try:
             # initialization the host name
