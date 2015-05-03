@@ -1,8 +1,5 @@
 
-import os, subprocess 
-import stat
-import re;
-
+import os, re, subprocess;
 
 class UtilsException(Exception):
     def __init__(self, value):
@@ -26,9 +23,9 @@ def get_norm_year_str(year):
     if year < 0:
         raise UtilsException('must provide a positive integer year YY or YYYY');
     
-    if year >= 80 and year <= 99:
+    if 80 <= year <= 99:
         year += 1900
-    elif year >= 0 and year < 80:
+    elif 0 <= year < 80:
         year += 2000        
 
     return str(year)

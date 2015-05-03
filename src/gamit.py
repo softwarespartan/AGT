@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-'''
+"""
 Created on Feb 18, 2013
 
 @author: abelbrown
-'''
+"""
 
 import os, re, glob, gzip, Utils, Processing, Resources, pyDate;
 
@@ -273,7 +273,7 @@ class Session(Processing.Session):
         # all done
         setup_file.close();
         
-        # add executable premissions
+        # add executable permissions
         os.system('chmod +x '+setup_file_path);
         
         # return the path for traceability
@@ -459,7 +459,7 @@ class Session(Processing.Session):
         # all done
         run_file.close();
         
-        # add executable premissions
+        # add executable permissions
         os.system('chmod +x '+run_file_path);
         
         # return path
@@ -607,7 +607,7 @@ class Session(Processing.Session):
         # make sure to close the file
         teardown_file.close();
         
-        # add executable premissions
+        # add executable permissions
         os.system('chmod +x '+teardown_file_path);
         
         # return path

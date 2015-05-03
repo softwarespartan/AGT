@@ -1,5 +1,5 @@
-from boto.s3.key        import Key         ;
-from boto.s3.connection import S3Connection;
+from boto.s3.key        import Key
+from boto.s3.connection import S3Connection,OrdinaryCallingFormat
 
 import re,os,pyDate,Utils;
 
@@ -37,10 +37,10 @@ def get_sp3(year,doy,org,outdir=None):
     sp3_file_name_base = org+gps_week_str+str(date.gpsWeekDay)+'.sp3';
     
     # set outdir to current directory if not set
-    if outdir == None: outdir = '.';
+    if outdir is None: outdir = '.';
     
     # init s3 connection to the metadata bucket
-    conn      = S3Connection()   ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())   ;
     bucket    = conn.get_bucket(WL_SP3_BUCKET)         ;
     bucketKey = Key(bucket)                            ;                       
    
@@ -51,7 +51,7 @@ def get_sp3(year,doy,org,outdir=None):
     if len(file_list) == 0: 
         raise ResourceException('sp3 resource: '+sp3_file_name_base+' could not be located');
     
-    # make sure no more than a single match occured
+    # make sure no more than a single match occurred
     if len(file_list) > 1:
         raise ResourceException('sp3 resource: '+sp3_file_name_base+' matches multiple files');
     
@@ -79,17 +79,17 @@ def get_nav(year,doy,org,outdir=None):
     nav_file_name = org+doy+'0.'+year[2:]+'n.Z';
     
     # set outdir to current directory if not set
-    if outdir == None: outdir = '.';
+    if outdir is None: outdir = '.';
     
     # create the sp3 file path
     nav_file_path = os.path.join(outdir,nav_file_name);
     
     # init s3 connection to the metadata bucket
-    conn      = S3Connection()  ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
     bucket    = conn.get_bucket(WL_NAV_BUCKET)     ;
     bucketKey = bucket.get_key(nav_file_name)         ;
     
-    if bucketKey == None:
+    if bucketKey is None:
         raise ResourceException('nav resource: '+nav_file_name+' could not be located');
     
     # create the s3 object
@@ -118,7 +118,7 @@ def get_rnx(year,doy,stn_list,outdir=None):
         rnx_file_name = code+doy+'0.'+year[2:]+'d.Z';
         
         # set outdir to current directory if not set
-        if outdir == None: outdir = '.';
+        if outdir is None: outdir = '.';
         
         # create the sp3 file path
         rnx_file_path = os.path.join(outdir,rnx_file_name);
@@ -127,11 +127,11 @@ def get_rnx(year,doy,stn_list,outdir=None):
         rnx_key_path = '/'.join([ns,year,doy,rnx_file_name]);
         
         # init s3 connection to the metadata bucket
-        conn      = S3Connection( )  ;
+        conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
         bucket    = conn.get_bucket(WL_RNX_BUCKET)     ;
         bucketKey = bucket.get_key(rnx_key_path)          ;
         
-        if bucketKey == None:
+        if bucketKey is None:
             # create the file name of the rnx with session 1
             rnx_file_name = code+str(doy)+'1.'+str(year)[2:]+'d.Z';
             
@@ -141,7 +141,7 @@ def get_rnx(year,doy,stn_list,outdir=None):
             # check for session 1 file
             bucketKey = bucket.get_key(rnx_key_path);
             
-            if bucketKey == None:
+            if bucketKey is None:
                 os.sys.stderr.write('rnx resource: '+stnId+' could not be located for '+year+' '+doy+'\n');
                 continue;
         
@@ -167,7 +167,7 @@ def get_stn_info(year,doy,stn_list,outdir=None):
         (ns,code) = Utils.parse_stnId(stnId);
         
         # set outdir to current directory if not set
-        if outdir == None: outdir = '.';
+        if outdir is None: outdir = '.';
     
         # set the file name for the station info
         stn_info_file_name = '.'.join((ns,code,'station','info'));
@@ -176,12 +176,12 @@ def get_stn_info(year,doy,stn_list,outdir=None):
         stn_info_file_path = os.path.join(outdir,stn_info_file_name);
         
         # init s3 connection to the metadata bucket
-        conn      = S3Connection( )  ;
+        conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
         bucket    = conn.get_bucket(WL_STN_BUCKET)        ;
         bucketKey = bucket.get_key(stn_info_file_name)    ;
         
         # let the user know that the file does not exist and continue
-        if bucketKey == None:
+        if bucketKey is None:
             os.sys.stderr.write('station info resource: '+stnId+' could not be located\n');
             continue;
         
@@ -202,7 +202,7 @@ def get_apr(year,doy,dns,outdir=None):
     doy  = Utils.get_norm_doy_str (doy );
     
     # set outdir to current directory if not set
-    if outdir == None: outdir = '.';
+    if outdir is None: outdir = '.';
     
     # set the file name for the station info
     apr_file_name = '.'.join((dns,year,doy,'apr'));
@@ -211,12 +211,12 @@ def get_apr(year,doy,dns,outdir=None):
     apr_file_path = os.path.join(outdir,apr_file_name);
     
     # init s3 connection to the metadata bucket
-    conn      = S3Connection( )  ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
     bucket    = conn.get_bucket(WL_APR_BUCKET)     ;
     bucketKey = bucket.get_key(apr_file_name)         ;
     
     # make sure we're on track here
-    if bucketKey == None:
+    if bucketKey is None:
             raise ResourceException('could not locate resource: '+apr_file_name);
     
     # create the s3 object
@@ -231,7 +231,7 @@ def get_apr(year,doy,dns,outdir=None):
 def get_bin(program,outdir=None):
     
     # make sure program specified is not bogus
-    if program == None or program == "":
+    if program is None or program == "":
         raise ResourceException('invalid program name');
     
     # figure out what platform we're on
@@ -244,17 +244,17 @@ def get_bin(program,outdir=None):
     rid = '.'.join((rid,'tar','gz'));
     
     # set outdir to current directory if not set
-    if outdir == None: outdir = '.';
+    if outdir is None: outdir = '.';
     
     # compute the full file path
     bin_file_path = os.path.join(outdir,rid);
     
     # init s3 connection to the resources bucket
-    conn      = S3Connection( )  ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
     bucket    = conn.get_bucket(WL_RES_BUCKET)     ;
     bucketKey = bucket.get_key(rid)                   ;
     
-    if bucketKey == None:
+    if bucketKey is None:
         raise ResourceException('binary resource: '+rid+' could not be located');
     
     # set the key to download
@@ -269,11 +269,11 @@ def get_bin(program,outdir=None):
 def get_tables(program,outdir=None):
     
     # make sure program specified is not bogus
-    if program == None or program == "":
+    if program is None or program == "":
         raise ResourceException('invalid program name');
     
     # set outdir to current directory if not set
-    if outdir == None: outdir = '.';
+    if outdir is None: outdir = '.';
     
     # compute the resource id
     rid = Utils.get_resource_delimiter().join((program,'tables'));
@@ -285,11 +285,11 @@ def get_tables(program,outdir=None):
     tables_file_path = os.path.join(outdir,rid);
     
     # init s3 connection to the resources bucket
-    conn      = S3Connection( )  ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
     bucket    = conn.get_bucket(WL_RES_BUCKET)     ;
     bucketKey = bucket.get_key(rid)                   ;
     
-    if bucketKey == None:
+    if bucketKey is None:
         raise ResourceException('tables resource: '+rid+' could not be located');
     
     # set the key to download
@@ -310,7 +310,7 @@ def pushSNX(key_path,file_path):
     file_key_path = "/".join((key_path,file_name));
     
     # init s3 connection to the metadata bucket
-    conn      = S3Connection( )  ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
     bucket    = conn.get_bucket(WL_SOLN_BUCKET)       ;
     bucketKey = Key(bucket)                           ;
     
@@ -328,7 +328,7 @@ def pushSP3(file_path):
     file_key_path = file_name;
     
     # init s3 connection to the metadata bucket
-    conn      = S3Connection( )  ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
     bucket    = conn.get_bucket(WL_SP3_BUCKET)        ;
     bucketKey = Key(bucket)                           ;
     
@@ -344,7 +344,7 @@ def pushOUT(key_path,file_path):
     file_key_path = "/".join((key_path,file_name));
     
     # init s3 connection to the metadata bucket
-    conn      = S3Connection( )  ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
     bucket    = conn.get_bucket(WL_SOLN_BUCKET)    ;
     bucketKey = Key(bucket)                           ;
     
@@ -359,7 +359,7 @@ def get_snx(key_path,outdir=None):
     snx_file_list = list();
     
     # set outdir to current directory if not set
-    if outdir == None: outdir = '.';
+    if outdir is None: outdir = '.';
     
     # make sure to expand any user symbols
     outdir = os.path.expanduser(outdir);
@@ -370,7 +370,7 @@ def get_snx(key_path,outdir=None):
     pattern = re.compile('.*\.snx\..*');
     
     # init s3 connection to the metadata bucket
-    conn      = S3Connection( )  ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
     bucket    = conn.get_bucket(WL_SOLN_BUCKET)       ;
     bucketKey = Key(bucket)                           ;
     
@@ -416,10 +416,10 @@ def get_resources(key_path,ext=None,outdir=None):
     res_file_list = list();
     
     # set the file extension to everything, if not set
-    if ext == None: ext = '*';
+    if ext is None: ext = '*';
     
     # set outdir to current directory if not set
-    if outdir == None: outdir = '.';
+    if outdir is None: outdir = '.';
     
     # make sure to expand any user symbols
     outdir = os.path.expanduser(outdir);
@@ -433,7 +433,7 @@ def get_resources(key_path,ext=None,outdir=None):
     pattern = re.compile('.*'+ext);
     
     # init s3 connection to the metadata bucket
-    conn      = S3Connection( )  ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
     bucket    = conn.get_bucket(WL_SOLN_BUCKET)       ;
     bucketKey = Key(bucket)                           ;
     
@@ -479,10 +479,10 @@ def list_resources(key_path,ext=None,outdir=None):
     res_file_list = list();
     
     # set the file extension to everything, if not set
-    if ext == None: ext = '*';
+    if ext is None: ext = '*';
     
     # set outdir to current directory if not set
-    if outdir == None: outdir = '.';
+    if outdir is None: outdir = '.';
     
     # make sure to expand any user symbols
     outdir = os.path.expanduser(outdir);
@@ -496,7 +496,7 @@ def list_resources(key_path,ext=None,outdir=None):
     pattern = re.compile('.*'+ext);
     
     # init s3 connection to the metadata bucket
-    conn      = S3Connection( )  ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
     bucket    = conn.get_bucket(WL_SOLN_BUCKET)       ;
     bucketKey = Key(bucket)                           ;
     
