@@ -181,7 +181,7 @@ class WorkerThread(threading.Thread):
             # blab about the problem to standard error
             os.sys.stderr.write(str(e)+'\n'); 
             
-            # loog error message
+            # log error message
             self.publish_error('handle_messageparse_job: '+str(e));
             
             # for now, lets remove the message from the jobQueue
@@ -192,6 +192,7 @@ class WorkerThread(threading.Thread):
         
         # make sure we have something to work with before we proceed
         if len(job_dict.keys()) == 0:
+            os.sys.stderr.write(' job_dict.keys() has zero length ... \n');
             self.jobQueue.delete_message(message);
             return;
         
@@ -220,7 +221,7 @@ class WorkerThread(threading.Thread):
                 os.system(job_dict[job_name]);      
                 
                 # update job count
-                self.total_job_count = self.total_job_count + 1;
+                self.total_job_count += 1
                 
                 # compute the execution time
                 dt = datetime.datetime.now() - self.start_time;
