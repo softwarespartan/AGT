@@ -6,14 +6,14 @@ from boto.sqs.message    import Message      ;
 
 import xml.etree.ElementTree as ET;
 
-JOB_QUEUE        = 'com_widelane_jobs'                    ;
-ERR_QUEUE        = 'com_widelane_err'                     ;
-NODE_STATS_QUEUE = 'com_widelane_nodestats'               ;
+JOB_QUEUE        = 'com_widelane_jobs'     ;
+ERR_QUEUE        = 'com_widelane_err'      ;
+NODE_STATS_QUEUE = 'com_widelane_nodestats';
 
-WORKER_SLEEP_SECONDS   = 30                               ;
-STATS_SLEEP_SECONDS    = 60*5                             ;
-CHECKOUT_SLEEP_SECONDS = 60*25                            ;
-JOB_LEASE_SECONDS      = 60*30                            ;
+WORKER_SLEEP_SECONDS   = 30   ;
+STATS_SLEEP_SECONDS    = 60*5 ;
+CHECKOUT_SLEEP_SECONDS = 60*25;
+JOB_LEASE_SECONDS      = 60*30;
 
 
 class InfrastructureException(Exception):
@@ -306,7 +306,7 @@ class JobDeamon():
         # init empty list of threads
         self.threads = [];
         
-        # make note of the numer of requested threads
+        # make note of the number of requested threads
         self.num_threads = num_threads;
        
     def start(self):
@@ -489,7 +489,16 @@ class JobDeamon():
             
             # log error message to the error queue
             self.publish_error('publish_node_stats@: '+str(e));
-            
+
+    def publish_error(self,err_str):
+
+            # generate message string
+            error_message = self.reflection.public_hostname+': '+err_str;
+
+            # write the message to the error queue
+            self.errQueue.write(Message().set_body(error_message));
+
+
 def main():
     
     try:
@@ -497,7 +506,7 @@ def main():
         # get the processor count for this machine
         num_cpu = Utils.get_processor_count();
         
-        # init number of threads to the number of CPU/cores avalable
+        # init number of threads to the number of CPU/cores available
         num_threads = num_cpu;
         
         # if the user has requested specific number of threads
