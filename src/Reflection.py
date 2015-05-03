@@ -2,7 +2,7 @@
 
 URL = 'http://169.254.169.254/latest/meta-data/';
 
-import boto, datetime, subprocess, os,re;
+import boto, datetime, subprocess, os, boto.ec2.connection;
 
 
 class Reflect(object):
@@ -27,9 +27,9 @@ class Reflect(object):
         self.public_hostname    = self.__process_request('public-hostname'            );
         
         # now use this data to calculate the current price
-        self.current_spot_price = self.__get_current_spot_price(                      \
-                                                                self.instance_type,   \
-                                                                self.availability_zone\
+        self.current_spot_price = self.__get_current_spot_price(
+                                                                self.instance_type,
+                                                                self.availability_zone
                                                                );
         
         
@@ -48,14 +48,14 @@ class Reflect(object):
         start_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000Z");
         
         # create connection to ec2
-        conn = boto.connect_ec2();
+        conn = boto.ec2.connection.EC2Connection();
         
         # get the current price
-        prices = conn.get_spot_price_history(                                   \
-                                             instance_type=instanceType        ,\
-                                             start_time=start_time             ,\
-                                             availability_zone=availabilityZone,\
-                                             product_description='Linux/UNIX'   \
+        prices = conn.get_spot_price_history(
+                                             instance_type=instanceType        ,
+                                             start_time=start_time             ,
+                                             availability_zone=availabilityZone,
+                                             product_description='Linux/UNIX'
          
                                             )
         
