@@ -493,10 +493,16 @@ class JobDeamon():
     def publish_error(self,err_str):
 
             # generate message string
-            error_message = self.reflection.public_hostname+': '+err_str;
+            error_message_content = self.reflection.public_hostname+': '+err_str;
+
+            # create new empty message
+            error_message = Message();
+
+            # populate the message with content
+            error_message.set_body(error_message_content);
 
             # write the message to the error queue
-            self.errQueue.write(Message().set_body(error_message));
+            self.errQueue.write(error_message);
 
 
 def main():

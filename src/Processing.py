@@ -1,8 +1,8 @@
-'''
+"""
 Created on Feb 9, 2013
 
 @author: abelbrown
-'''
+"""
 
 import datetime     ;
 import re           ;
@@ -31,24 +31,15 @@ def solution_bucket(year,doy,prog_id,expt,org,network_id=None):
     year = Utils.get_norm_year_str(year);
     doy  = Utils.get_norm_doy_str (doy );
     
-    path = os.path.join(                            \
-                        year                      , \
-                        doy                       , \
-                        prog_id                   , \
-                        expt                      , \
-                        org                         \
+    path = os.path.join(
+                        year                      ,
+                        doy                       ,
+                        prog_id                   ,
+                        expt                      ,
+                        org
                     );
-    
-    # default solution paths
-#     path =  "/".join((                            \
-#                       year                      , \
-#                       doy                       , \
-#                       prog_id                   , \
-#                       expt                      , \
-#                       org                         \
-#                      ));
                 
-    # if the network id was specifed then tack it on     
+    # if the network id was specified then tack it on
     if network_id != None: path = '/'.join((path,network_id));
     
     # that's all
@@ -60,18 +51,18 @@ class Session(object):
         
         self.stn_list = []; self.src = [];
 
-        self.options = {                              \
-                       'year'           : None       ,\
-                       'doy'            : None       ,\
-                       'eop_type'       : 'usno'     ,\
-                       'expt_type'      : 'baseline' ,\
-                       'minspan'        : 12         ,\
-                       'should_iterate' : 'yes'      ,\
-                       'sp3_type'       : 'ig1'      ,\
-                       'org'            : 'tmp'      ,\
-                       'expt'           : 'dflt'     ,\
-                       'network_id'     : 'n0'       ,\
-                       'dns'            : 'osf.gamit',\
+        self.options = {
+                       'year'           : None       ,
+                       'doy'            : None       ,
+                       'eop_type'       : 'usno'     ,
+                       'expt_type'      : 'baseline' ,
+                       'minspan'        : 12         ,
+                       'should_iterate' : 'yes'      ,
+                       'sp3_type'       : 'ig1'      ,
+                       'org'            : 'tmp'      ,
+                       'expt'           : 'dflt'     ,
+                       'network_id'     : 'n0'       ,
+                       'dns'            : 'osf.gamit',
                        };
                        
         self.work_dir_path = None;
@@ -82,7 +73,7 @@ class Session(object):
                        
     def configure_with_args(self,argv):
         
-        # init long aruments
+        # init long arguments
         longArgs = [op+'=' for op in self.options.keys()];
         
         # tack on the stn src and debug args
@@ -138,7 +129,7 @@ class Session(object):
     def validate(self):
         
         # check the year is specified
-        if self.options['year'] == None: 
+        if self.options['year'] is None: 
             raise SessionException('must specify integer year as --year=YYYY');
         
         # make sure that year is a number
@@ -157,7 +148,7 @@ class Session(object):
             raise SessionException('year is too big');
         
         # check the doy is specified
-        if self.options['doy'] == None: 
+        if self.options['doy'] is None: 
             raise SessionException('must specify integer doy using --doy=');
         
         # make sure that doy is a number
@@ -224,7 +215,7 @@ class Session(object):
             
         # make sure that a metadata name space has been 
         # specified and if so that it has been specified correctly
-        if self.options['dns'] == None:
+        if self.options['dns'] is None:
             raise SessionException('must specify metadata name space using --dns=');
         
         # check that the station list has only unique station id
@@ -255,9 +246,9 @@ class Session(object):
     
     def is_valid(self):
         
-        if self.options['year'] ==  None       \
-            or self.options['doy'] == None     \
-                or self.work_dir_path == None:
+        if self.options['year'] is None        \
+            or self.options['doy'] is None     \
+                or self.work_dir_path is None:
             return False;
         else:
             return True;
@@ -265,7 +256,7 @@ class Session(object):
     
     def compute_work_dir_path(self):
     
-        if self.options['year'] ==  None or self.options['doy'] == None:
+        if self.options['year'] is None or self.options['doy'] is None:
             raise SessionException('invalid state: year or doy not set');
     
         # make sure year is 4 digits
@@ -304,7 +295,7 @@ class Session(object):
     def get_resources_path(self):
         
         # make sure that work directory has been initialized
-        if self.work_dir_path == None:
+        if self.work_dir_path is None:
             raise SessionException('invalid session state: work directory has not been set');
         
         return os.path.join(self.work_dir_path,Resources.WL_BUCKET);
@@ -312,13 +303,13 @@ class Session(object):
      
     def get_solution_bucket(self,prog_id):
         
-        return solution_bucket(                           \
-                             self.options['year']       , \
-                             self.options['doy' ]       , \
-                             prog_id                    , \
-                             self.options['expt']       , \
-                             self.options['org' ]       , \
-                             self.options['network_id']   \
+        return solution_bucket(                           
+                             self.options['year']       , 
+                             self.options['doy' ]       , 
+                             prog_id                    , 
+                             self.options['expt']       , 
+                             self.options['org' ]       , 
+                             self.options['network_id']   
                             )
  
      
@@ -330,10 +321,10 @@ class Session(object):
          
         # make sure the the temporary directory does not already exist
         if os.path.isdir(self.work_dir_path):
-            raise SessionException(                           \
-                                   'temporary work directory '\
-                                   +self.work_dir_path        \
-                                   +' already exists'         \
+            raise SessionException(                           
+                                   'temporary work directory '
+                                   +self.work_dir_path        
+                                   +' already exists'         
                                   );
         
         # attempt to create the work directory
@@ -347,43 +338,43 @@ class Session(object):
             raise SessionException(str(e));
         
         # get the sp3 files
-        self.files['sp3'] = Resources.get_sp3(                          \
-                                              self.options['year'    ], \
-                                              self.options['doy'     ], \
-                                              self.options['sp3_type'], \
-                                              self.get_resources_path() \
+        self.files['sp3'] = Resources.get_sp3(                          
+                                              self.options['year'    ], 
+                                              self.options['doy'     ], 
+                                              self.options['sp3_type'], 
+                                              self.get_resources_path() 
                                              );
         
         # get the nav files
-        self.files['nav'] = Resources.get_nav(                          \
-                                              self.options['year'    ], \
-                                              self.options['doy'     ], \
-                                              'auto'                  , \
-                                              self.get_resources_path() \
+        self.files['nav'] = Resources.get_nav(                          
+                                              self.options['year'    ], 
+                                              self.options['doy'     ], 
+                                              'auto'                  , 
+                                              self.get_resources_path() 
                                              );
         
         # get the rnx files
-        self.files['rnx'] = Resources.get_rnx(                          \
-                                              self.options['year'    ], \
-                                              self.options['doy'     ], \
-                                              self.stn_list           , \
-                                              self.get_resources_path() \
+        self.files['rnx'] = Resources.get_rnx(                          
+                                              self.options['year'    ], 
+                                              self.options['doy'     ],
+                                              self.stn_list           , 
+                                              self.get_resources_path() 
                                              );
         
         # get the station info  files
-        self.files['stn_info'] = Resources.get_stn_info(                \
-                                              self.options['year'    ], \
-                                              self.options['doy'     ], \
-                                              self.stn_list           , \
-                                              self.get_resources_path() \
+        self.files['stn_info'] = Resources.get_stn_info(                
+                                              self.options['year'    ], 
+                                              self.options['doy'     ], 
+                                              self.stn_list           , 
+                                              self.get_resources_path() 
                                              );
                          
         # get the apr files
-        self.files['apr'] = Resources.get_apr(                          \
-                                              self.options['year'    ], \
-                                              self.options['doy'     ], \
-                                              self.options['dns'     ], \
-                                              self.get_resources_path() \
+        self.files['apr'] = Resources.get_apr(                          
+                                              self.options['year'    ], 
+                                              self.options['doy'     ], 
+                                              self.options['dns'     ], 
+                                              self.get_resources_path() 
                                              );
      
          
@@ -537,11 +528,11 @@ class Session(object):
         var_factor = snxParser.varianceFactor;
             
         # save as a mat file
-        scipy.io.savemat(solnFilePath, mdict={'stnm'      :stn_list   ,  \
-                                              'epochs'    :epochs     ,  \
-                                              'npvs'      :npvs       ,  \
-                                              'npv_sigma' :npvs_sigma ,  \
-                                              'var_factor':var_factor},  \
+        scipy.io.savemat(solnFilePath, mdict={'stnm'      :stn_list   ,  
+                                              'epochs'    :epochs     ,  
+                                              'npvs'      :npvs       ,  
+                                              'npv_sigma' :npvs_sigma ,  
+                                              'var_factor':var_factor},  
                          oned_as = 'column');
                          
         # gzip the file up
