@@ -409,7 +409,9 @@ class JobDeamon():
                                                self.reflection.instance_type     ,
                                                self.reflection.current_spot_price
                                               );
-                
+
+            os.sys.stderr.write('initialized stats ... '+stats+'\n');
+
             # figure out how many jobs have been executed
             total_job_count = self.get_total_num_jobs_executed();
             
