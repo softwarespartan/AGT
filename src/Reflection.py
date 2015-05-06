@@ -61,12 +61,12 @@ class Reflect(object):
         
         # make sure that we have at least 1 price to return 
         if len(prices) == 0:
-            return None;
+            return '?';
         else:
             try:
                 return float(prices[0].price);
             except:
-                return None;
+                return '?';
         
         
 def main():
