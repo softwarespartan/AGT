@@ -40,8 +40,9 @@ class Reflect(object):
         
     def is_ec2(self):
         return 'amzn' in os.uname()[2];
-        
-        
+
+
+    # noinspection PyBroadException
     def __get_current_spot_price(self, instanceType,availabilityZone):
         
         # create iso datetime string
@@ -49,24 +50,30 @@ class Reflect(object):
         
         # create connection to ec2
         conn = boto.ec2.connection.EC2Connection();
+
+        productDescription = 'Linux/UNIX';
         
         # get the current price
         prices = conn.get_spot_price_history(
                                              instance_type=instanceType        ,
                                              start_time=start_time             ,
                                              availability_zone=availabilityZone,
-                                             product_description='Linux/UNIX'
-         
+                                             product_description=productDescription
                                             )
         
         # make sure that we have at least 1 price to return 
         if len(prices) == 0:
-            return '?';
-        else:
-            try:
-                return float(prices[0].price);
-            except:
-                return '?';
+            productDescription = 'Linux/UNIX (Amazon VPC)';
+            prices = conn.get_spot_price_history(
+                                             instance_type=instanceType        ,
+                                             start_time=start_time             ,
+                                             availability_zone=availabilityZone,
+                                             product_description=productDescription
+                                            );
+        try:
+            return float(prices[0].price);
+        except:
+            return float('inf');
         
         
 def main():

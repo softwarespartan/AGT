@@ -272,21 +272,22 @@ class WorkerThread(threading.Thread):
     def terminate_message_visibility_timer(self):
         
         # defensive check for null
-        if self.visability_timer != None:
+        if self.visability_timer is not None:
             
             # terminate the timer thread
             self.visability_timer.cancel();
 
 
     def is_active(self):
-        if self.job_name != None: 
+        if self.job_name is not None:
             return True 
         else: 
             return False;
         
         
     def terminate(self):
-        self.terminate.set();
+        self.terminate_message_visibility_timer();
+        self.terminate();
                 
 class JobDeamon():
     
@@ -315,6 +316,9 @@ class JobDeamon():
         
         # make note of the number of requested threads
         self.num_threads = num_threads;
+
+        # empty node states timer until we get job
+        self.node_stats_timer = None;
        
     def start(self):
         
@@ -456,7 +460,7 @@ class JobDeamon():
                 stats += '%2d  %-23s  %6.1f  %5s \n' % (i,t.job_name,work_time,unit);
                 
                 # update job counter 
-                i = i + 1;
+                i += 1
                 
         except Exception as e:
 
