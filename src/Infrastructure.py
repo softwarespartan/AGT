@@ -11,7 +11,7 @@ ERR_QUEUE        = 'com_widelane_err'      ;
 NODE_STATS_QUEUE = 'com_widelane_nodestats';
 
 WORKER_SLEEP_SECONDS   = 30   ;
-STATS_SLEEP_SECONDS    = 60*0.5 ;
+STATS_SLEEP_SECONDS    = 60*15;
 CHECKOUT_SLEEP_SECONDS = 60*25;
 JOB_LEASE_SECONDS      = 60*30;
 
