@@ -1,9 +1,8 @@
+#!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
 import threading;
 import os,re,copy;
-import _wl_gamit_;
 import JobSpecification;
-
-import Queue
+import Queue;
 
 class _sqs_load_Exception(Exception):
     def __init__(self, value):
@@ -40,10 +39,9 @@ class WorkerThread(threading.Thread):
     # @Override
     def run(self):
         
-        print "Thread ",self.name,' is starting ...';
+        #print "Thread ",self.name,' is starting ...';
         
         while self.file_queue.qsize() > 0:
-            
             
             try:
                 try:
@@ -78,9 +76,6 @@ class WorkerThread(threading.Thread):
             finally:
                 # notify queue that we're done
                 self.file_queue.task_done();
-                
-                    
-
 
     def push_job_sqs(self,xml):
         
@@ -100,7 +95,7 @@ def find_stn_lists(dir,match=None):
     pattern2 = re.compile('^stn_list\.\d\d\d\d\.\d\d\d\.n\d+$');
     pattern3 = None;
     
-    if match != None: print match;pattern3 = re.compile(match);
+    if match is not None: pattern3 = re.compile(match);
     
     # init list to hold the station list files
     stn_list_files = list();
@@ -109,7 +104,7 @@ def find_stn_lists(dir,match=None):
     for root, dirs, files in os.walk(dir): # Walk directory tree
         for f in files:
             if pattern1.match(f) or pattern2.match(f):
-                if pattern3 != None:
+                if pattern3 is not None:
                     if pattern3.match(f):
                         stn_list_files.append(os.path.join(root,f));
                 else:
@@ -118,11 +113,34 @@ def find_stn_lists(dir,match=None):
     # that's all
     return stn_list_files;
 
+def load_stn_lists(afile,match=None):
+
+    pattern1 = re.compile('^stn_list\.\d\d\d\d\.\d\d\d$');
+    pattern2 = re.compile('^stn_list\.\d\d\d\d\.\d\d\d\.n\d+$');
+    pattern3 = None;
+
+    if match is not None: pattern3 = re.compile(match);
+
+    # init list to hold the station list files
+    stn_list_files = list();
+
+    # walk the current directory to find the station list files
+    with open(afile) as fid:
+        for f in fid.readlines():
+            f = f.strip();
+            if pattern1.match(os.path.basename(f)) or pattern2.match(os.path.basename(f)):
+                 if pattern3 is not None:
+                     if pattern3.match(os.path.basename(f)):
+                         stn_list_files.append(f);
+                 else:
+                     stn_list_files.append(f);
+    # that's all
+    return stn_list_files;
+
 if __name__ == "__main__":
 
     # init new queue for files
     file_queue = Queue.Queue();
-
 
     # get the input args (without progname)
     sys_args = os.sys.argv[1:];
@@ -130,15 +148,18 @@ if __name__ == "__main__":
     # see if the file as been specified
     dir_arg = [arg for arg in sys_args if arg.startswith('--indir')];
 
-    # make sure that we have the input directry to load
-    if len(dir_arg) != 1:
-        raise _sqs_load_Exception('must specify --indir= as command line arg'); 
+    # see if file with station lists has been specified
+    file_arg = [arg for arg in sys_args if arg.startswith('--file')];
+
+    # make sure that we have the input directory to load
+    if len(dir_arg) != 1 and len(file_arg) != 1:
+        raise _sqs_load_Exception('must specify --indir= or --file= as command line arg');
+
+    if len(dir_arg) == 1 and len(file_arg) == 1:
+         raise _sqs_load_Exception('must specify --indir= OR --file= as command line arg but not both');
     
     # see if the station list match arg has been specified
-    match_arg = [arg for arg in sys_args if arg.startswith('--match')];   
-    
-    # convert from list to string
-    dir_arg = dir_arg[0];
+    match_arg = [arg for arg in sys_args if arg.startswith('--match')];
     
     # turn match arg into list or set as none
     if len(match_arg) > 0: 
@@ -156,19 +177,45 @@ if __name__ == "__main__":
         sys_args.remove(match_arg);
         
     else: match_arg = None; match_str = None;
-    
-    # make sure only two parts to the file arg
-    if len(re.split('=',dir_arg)) != 2:
-        raise _sqs_load_Exception('invalid file arg: '+dir_arg);
-    
-    # isolate file path
-    dir_path = re.split('=',dir_arg)[1];
-        
-    # make sure to remove from sys args 
-    sys_args.remove(dir_arg);  
-    
-    # build list of files
-    stn_lists = find_stn_lists(os.path.expanduser(dir_path),match_str);
+
+
+    # init station list
+    stn_lists = list();
+
+    if len(dir_arg) == 1:
+        # convert from list to string
+        dir_arg = dir_arg[0];
+
+        # make sure only two parts to the file arg
+        if len(re.split('=',dir_arg)) != 2:
+            raise _sqs_load_Exception('invalid file arg: '+dir_arg);
+
+        # isolate file path
+        dir_path = re.split('=',dir_arg)[1];
+
+        # make sure to remove from sys args
+        sys_args.remove(dir_arg);
+
+        # build list of files
+        stn_lists = find_stn_lists(os.path.expanduser(dir_path),match_str);
+
+    if len(file_arg) == 1:
+
+        # convert from list to string
+        file_arg = file_arg[0];
+
+        # make sure only two parts to the file arg
+        if len(re.split('=',file_arg)) != 2:
+            raise _sqs_load_Exception('invalid file arg: '+file_arg);
+
+        # isolate file path
+        file_path = re.split('=',file_arg)[1];
+
+        # make sure to remove from sys args
+        sys_args.remove(file_arg);
+
+        # build list of files
+        stn_lists = load_stn_lists(os.path.expanduser(file_path),match_str);
     
     # if no station lists found then complain about it to the user
     if len(stn_lists) == 0:
@@ -178,7 +225,7 @@ if __name__ == "__main__":
     # blab to the user
     print "mapping",len(stn_lists),'jobs'
     
-    for f in stn_lists: print f;
+    #for f in stn_lists: print f;
     
     # populate queue
     for f in stn_lists:

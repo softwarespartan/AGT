@@ -261,7 +261,8 @@ class Session(Processing.Session):
         done
         
         # purge all apr sigma and use 99.99
-        cat sittbl. | sed -e 's/NNN    .*/NNN    99.99 99.99 99.99/g' > tmp && mv tmp sittbl.;
+        #cat sittbl. | sed -e 's/NNN    .*/NNN    99.99 99.99 99.99/g' > tmp && mv tmp sittbl.;
+        cat sittbl. | sed -e 's/100.000/99.000/g' -e 's/\.000/\.00/g' > tmp && mv tmp sittbl.;
         
         # restore directory
         cd ../;
