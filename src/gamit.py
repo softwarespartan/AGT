@@ -261,7 +261,7 @@ class Session(Processing.Session):
         done
         
         # purge all apr sigma and use 99.99
-        cat sittbl. | sed -e 's/NNN    .*/NNN    99.99 99.99 99.99/g' > tmp && mv tmp sittbl.;
+        #cat sittbl. | sed -e 's/NNN    .*/NNN    99.99 99.99 99.99/g' > tmp && mv tmp sittbl.;
         #cat sittbl. | sed -e 's/100.000/99.000/g' -e 's/\.000/\.00/g' > tmp && mv tmp sittbl.;
         
         # restore directory
@@ -345,8 +345,14 @@ class Session(Processing.Session):
         EXE=0;
         
         # do the damn thing 
-        sh_gamit -expt $EXPT -d $YEAR $DOY -orbt file -minspan $MIN_SPAN -noftp -remakex Y -eop $EOP &> $OUT_FILE
-        
+        sh_gamit -expt $EXPT -d $YEAR $DOY -orbt file -minspan $MIN_SPAN -noftp -remakex Y -eop $EOP """ \
+        % (self.options['expt'],year,doy,self.options['minspan'],self.options['eop_type'],self.options['org'],gpsWeek_str,str(date.gpsWeekDay));
+
+        # if we're in debug mode do not pipe output to file
+        if not self.isDebug: contents += """ &> $OUT_FILE; """;
+
+        contents += """
+
         grep -q "Geodetic height unreasonable"  $OUT_FILE;
         if [ $? -eq 0 ]; then
             sstn=`grep "MODEL/open: Site" $OUT_FILE  | tail -1 | cut -d ":" -f 5 | cut -d " " -f 3 |tr '[:upper:]' '[:lower:]'`;
@@ -419,7 +425,7 @@ class Session(Processing.Session):
         # copy the out file to the solutions direcoty if it exists
         [ -d ./solutions/* ] && cp *.out ./solutions/*;
         
-        """ % (self.options['expt'],year,doy,self.options['minspan'],self.options['eop_type'],self.options['org'],gpsWeek_str,str(date.gpsWeekDay));
+        """ ;
 
         run_file.write(contents);
         
