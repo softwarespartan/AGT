@@ -161,8 +161,8 @@ class Session(Processing.Session):
         
         contents = \
         """
-        # make sure we can find the program
-        export PATH=${PATH}:`pwd`/bin
+        # make sure we can find the program -- put local bin first
+        export PATH=`pwd`/bin:${PATH}
         
         # unpack the tar.gz files
         for file in $(ls *.gz);do gunzip $file;done
@@ -322,9 +322,9 @@ class Session(Processing.Session):
         fi
         
         echo "Iteration depth: $level"
-        
-        # make sure we can find the program
-        export PATH=${PATH}:`pwd`/bin
+
+        # make sure we can find the program -- put local bin first!
+        export PATH=`pwd`/bin:${PATH}
         
         # set the params
         EXPT=%s;
