@@ -7,33 +7,31 @@ Created on Jan 28, 2013
 if __name__ == '__main__':
 
     import pyStk;
-    import numpy as np;
-    import pyCoords;
     import pyDate;
     
     from boto.s3.key        import Key         ;
     from boto.s3.connection import S3Connection;
-    
+
+    import boto;
+    from boto.s3.connection import OrdinaryCallingFormat
+
     # init vars
-    namespace = 'g06b.gamit'                                       ;
-    dirS3     = 'com.widelane.apr'                                ;
-    #tsFile    = '/Users/abelbrown/Documents/OSU/data/g03/apr/g03_8_NEW_PRIORS.mat/g03_apr.mat';
-    #tsFile = '/Users/abelbrown/data/tmp/g04_APR.mat'
-    #tsFile = '/Users/abelbrown/data/g05/priors/g05_apr_2014.mat';
-    tsFile = '/Users/abelbrown/Dropbox/stk/data/g06b_apr2.mat';
+    namespace = 'g08c.gamit'
+    bucketId  = 'com.widelane.apr'
+    inFile    = '/Users/abelbrown/Dropbox/stk/data/apr/g08c_apr.mat'
     
     # init s3 connection to the metadata bucket
-    conn      = S3Connection()  ;
-    bucket    = conn.get_bucket(dirS3)              ;
-    bucketKey = Key(bucket)                         ;
+    conn      = S3Connection(calling_format=OrdinaryCallingFormat())
+    bucket    = conn.get_bucket(bucketId)
+    bucketKey = Key(bucket)
     
     # open the mat file with the apr 
-    ts = pyStk.pyTS().initFromMatFile(tsFile);
+    ts = pyStk.pyTS().initFromMatFile(inFile);
     
     for epoch in ts.epochs:
         
-        d      = pyDate.Date(fyear=epoch);
-        aprstr =  str(epoch)+'\n';
+        d      = pyDate.Date(fyear=epoch)
+        aprstr =  str(epoch)+'\n'
         
         numstn = 0;
         

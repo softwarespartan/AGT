@@ -1,19 +1,19 @@
 
-import pyDate;
-import Processing;
-import Resources;
+import pyDate
+import Processing
+import Resources
 import os;
 
 from multiprocessing import Pool;
 
 def run(dt,outdir):
     
-    org  = ['g06'];
-    expt = ['glbl','glbf','glbd','anet','gnet','capp','swpp','tigg','glbk'];
+    #org  = ['g06'];
+    #expt = ['glbl','glbf','glbd','anet','gnet','capp','swpp','tigg','glbk'];
     #expt = ['glbk'];
-    expt = ['anet','gnet'];
+    #expt = ['anet','gnet'];
     expt = ['glbk'];
-    org  = ['g06'];
+    org  = ['g09'];
     
     for e in expt:
         for o in org:
@@ -30,8 +30,8 @@ def run(dt,outdir):
 def action(dt):
     
     try:
-        run(dt,'/Volumes/PROMISE_PEGASUS/data/g06/data/');
-        #run(dt,'/Users/abelbrown/data/out');
+        #run(dt,'/Volumes/PROMISE_PEGASUS/data/g06/data/');
+        run(dt,'/Users/abelbrown/data');
     except:
         print "Unexpected error:", os.sys.exc_info()[0];
         
@@ -39,8 +39,8 @@ def action(dt):
 def main():
     
     # create start and stop dates for the run
-    start_date = pyDate.Date(year=1993,doy=1);
-    end_date   = pyDate.Date(year=2015,doy=22);
+    start_date = pyDate.Date(year=2016,doy=1);
+    end_date   = pyDate.Date(year=2016,doy=330);
         
     # init queue for dates
     dates = list();

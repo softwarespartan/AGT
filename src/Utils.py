@@ -65,7 +65,7 @@ def parse_stnId(stnId):
     code = parts[-1];
     
     # that's it
-    return ns,code;
+    return ns.lower(),code.lower();
 
 
 def get_platform_id():

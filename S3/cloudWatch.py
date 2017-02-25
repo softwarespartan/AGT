@@ -26,9 +26,9 @@ for r in reservations:
         inst_count += 1;
         
         # get list of cloud watch metrics for this instance
-        metrics = cw_conn.list_metrics(                                     \
-                                       dimensions={'InstanceId' : inst.id}, \
-                                       metric_name='CPUUtilization'         \
+        metrics = cw_conn.list_metrics(
+                                       dimensions={'InstanceId' : inst.id},
+                                       metric_name='CPUUtilization'
                                       )
         
         # if we got a metric return for this query then try que ry for data
@@ -70,11 +70,11 @@ for r in reservations:
             if cpu_avg_usage >= CPU_THRESHOLD: TERM='';
                 
             # print off some interesting information
-            print '%10s  %10s  %10s  %7.3f %10s' % (inst.id,             \
-                                                    inst.instance_type,  \
-                                                    inst.placement,      \
-                                                    cpu_avg_usage,       \
-                                                    TERM);
+            print '%10s    %10s    %10s  %7.3f   %10s' % (inst.id,
+                                                          inst.instance_type,
+                                                          inst.placement,
+                                                          cpu_avg_usage,
+                                                          TERM);
                                                   
             # it has got to be done!
             if cpu_avg_usage < CPU_THRESHOLD:

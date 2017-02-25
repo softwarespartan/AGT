@@ -21,7 +21,7 @@ class GamitException(Exception):
     
 def wlapr2apr(aprFile):         
         
-    sittblFile = 'sittbl.';  gamitAprFile = 'gamit.apr'
+    sittblFile = 'sittbl.';  gamitAprFileName = 'gamit.apr'
     
     # make sure that the file exists
     if not os.path.isfile(aprFile):
@@ -47,13 +47,13 @@ def wlapr2apr(aprFile):
         raise GamitException('could not open file '+sittblFile);
     
     # create absolute path to the sigma file
-    gamitAprFile = os.path.join(path,gamitAprFile);
+    gamitAprFilePath = os.path.join(path,gamitAprFileName)
     
-    # open itrf.apr
+    # open gamit apr file for writing
     try:
-        gamitAprFile = open(gamitAprFile,'w');
+        gamitAprFileHandle = open(gamitAprFilePath,'w')
     except:
-        raise GamitException('could not open file '+gamitAprFile);
+        raise GamitException('could not open file '+gamitAprFilePath)
 
     # get the reference epoch from the file
     refEpoch = float(src.readline());
@@ -93,7 +93,7 @@ def wlapr2apr(aprFile):
             % (code.upper(),X,Y,Z,0,0,0,refEpoch);
         
         # write the apr line to the file
-        gamitAprFile.write(aprline+'\n');
+        gamitAprFileHandle.write(aprline+'\n');
         
         # create the sigma line
         sigline = "%s %s_GPS     NNN    %5.3f %5.3f %5.3f" % (code.upper(),code.upper(),sigX,sigY,sigZ);
@@ -102,7 +102,10 @@ def wlapr2apr(aprFile):
         sittbl.write(sigline+'\n');
     
     # clean up - make sure to close all the file handles
-    src.close();  sittbl.close();  gamitAprFile.close();
+    src.close();  sittbl.close();  gamitAprFileHandle.close();
+
+    # return path to resulting apr file
+    return gamitAprFilePath
     
 class Session(Processing.Session):
         

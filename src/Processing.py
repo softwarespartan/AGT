@@ -60,7 +60,7 @@ class Session(object):
                        'should_iterate' : 'yes'      ,
                        'sp3_type'       : 'ig1'      ,
                        'org'            : 'tmp'      ,
-                       'expt'           : 'dflt'     ,
+                       'expt'           : 'none'     ,
                        'network_id'     : 'n0'       ,
                        'dns'            : 'osf.gamit',
                        };
@@ -239,9 +239,14 @@ class Session(object):
         
         # print the list of stations in the same fashion 
         print fmt % ('src',', '.join(self.src))
-        
+
+        # print the number of stations in the run
+        print fmt % ('num_stn',len(self.stn_list))
+
         # print out the work directory name 
         print fmt % ('work directory',self.work_dir_path);
+
+
     
     
     def is_valid(self):
@@ -298,7 +303,7 @@ class Session(object):
         if self.work_dir_path is None:
             raise SessionException('invalid session state: work directory has not been set');
         
-        return os.path.join(self.work_dir_path,Resources.WL_BUCKET);
+        return os.path.join(self.work_dir_path, Resources.WL_RESOURCES_LOCAL);
      
      
     def get_solution_bucket(self,prog_id):
@@ -534,30 +539,17 @@ class Session(object):
                                               'npv_sigma' :npvs_sigma ,  
                                               'var_factor':var_factor},  
                          oned_as = 'column');
-                         
-        # gzip the file up
-#         with open(solnFilePath+'.mat', 'rb') as orig_file:
-#             with gzip.open(solnFilePath+'.mat.gz', 'wb') as zipped_file:
-#                 zipped_file.writelines(orig_file);
 
-        # gzip the file up
-        try:
-            # initialize file handle to mat file 
-            orig_file   =      open(solnFilePath+'.mat'   , 'rb');
-            
-            # initialize file handle to gzip'd mat file
-            zipped_file = gzip.open(solnFilePath+'.mat.gz', 'wb'); 
-            
-            # populate the zip file with compressed mat data
-            zipped_file.writelines(orig_file);
-        except Exception, e:
-            
-            # blab about the problem to the user
-            print e;
-            
-            # clean up file handles
-            orig_file.close();
-            zipped_file.close();
+        # if we have a mat file then gzip it
+        if os.path.isfile(solnFilePath+'.mat'):
+
+            # gzip the file up with open file handles
+            with open(solnFilePath+'.mat', 'rb') as orig_file:
+                with gzip.open(solnFilePath+'.mat.gz', 'wb') as zipped_file:
+                    zipped_file.writelines(orig_file);
+
+            # clean up
+            os.remove(solnFilePath + '.mat')
                  
     
 def main():
