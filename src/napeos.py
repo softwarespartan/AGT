@@ -641,7 +641,7 @@ class Session(Processing.Session):
                 mv tmp db/tables/missdirs.dat;
 
                 # resolve the date for the status file (i.e. set the run time)
-                echo "R  0000/00/00-00:00:00.000 GENERATED    run %s/%s/%s-00:00:00.000000+00-00:00:00.000000 GPS" > tables/statusFile
+                echo "R  0000/00/00-00:00:00.000 GENERATED    run %s/%s/%s-00:00:00.000000+00-00:00:00.000000 GPS" > tables/statusfile
                 #cat statusFile | sed -e "s@\$YYYY@$year@g" -e "s@\$MM@$month@g" -e "s@\$DD@$day@g"> tmp;
                 #mv tmp statusFile;
 
