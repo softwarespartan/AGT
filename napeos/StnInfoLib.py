@@ -112,7 +112,7 @@ class StnInfoLine():
 
         # check that start and stop date are increaseing
         if self.stopDate < self.startDate:
-            raise StnInfoParseException("Invalid station info line: start date greater than stop date");
+            raise StnInfoParseException("[%s]Invalid station info line: start date greater than stop date"%self.stnName);
             #os.sys.stderr.write('ERROR: invalid station info line '+self.line+'\n');
 
         # count the number of days for this entry

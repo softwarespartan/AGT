@@ -777,16 +777,17 @@ class Session(Processing.Session):
         # return the status
         return status;
 
-
     def finalize(self):
 
         if self.isDebug: os.sys.stdout.write('ignoring finalize() in debug mode ... \n'); return;
 
-        for snx in self.getSNX():
-            print snx
-            self.mk_mat(snx);
+        for snx in self.getSNX(): self.mk_mat(snx)
 
-
+        # file away the data products
+        self.pushSNX('');
+        self.pushOUT('');
+        self.pushMAT('');
+        self.pushSP3(  );
 
 
 def main():
