@@ -1,4 +1,4 @@
-import os, glob, Processing, Resources, gamit, pyDomes, StnInfoLib, Utils, re, tarfile, shutil, pyDate
+import os, glob, Processing, Resources, gamit, pyDomes, StnInfoLib, Utils, re, tarfile, shutil, pyDate, math
 
 ATX_FILE_PATH = "$HOME/db/files/atx/gps.atx";
 APR_FILE_PATH = "$HOME/db/files/stat/gps.apr";
@@ -72,16 +72,20 @@ class Session(Processing.Session):
         napeos_site_dot_dat = self.create_site_dot_dat()
 
         # create the D-file for OTL call
-        gamit_D_file_path = self.create_D_file(gamit_apr_file_path)
+        #gamit_D_file_path = self.create_D_file(
+        #    gamit_apr_file_path, self.domesMgr.stn_list()
+        #)
 
         # create the U-file containing ocean loading coeffs
-        (status,gamit_U_file_path) = self.create_U_file(gamit_D_file_path)
+        #(status,gamit_U_file_path) = self.create_U_file(gamit_D_file_path)
 
         # create the napeos BLQ file
-        napeos_BLQ_file_path = self.create_BLQ_file(gamit_U_file_path)
+        #napeos_BLQ_file_path = self.create_BLQ_file(gamit_U_file_path)
+
+        napeos_BLQ_file_path = self.create_OTL_file(gamit_apr_file_path,self.domesMgr.stn_list())
 
         # clean up all this shit
-        self.init_cleanup()
+        #self.init_cleanup()
 
         # create the setup script for the job
         setup_script_file_path = self.create_setup_script()
@@ -330,7 +334,7 @@ class Session(Processing.Session):
         # fin
         return site_dat_file_path
 
-    def create_D_file(self, gamit_apr_file_path):
+    def create_D_file(self, gamit_apr_file_path, stn_list):
 
         # get the path to the resources dir
         resources_dir = self.get_resources_path()
@@ -342,7 +346,7 @@ class Session(Processing.Session):
         D_file_path = os.path.join(resources_dir,D_file_name)
 
         # get the name to the gamit apr file (i.e. L-file)
-        apr_file_name = os.path.basename(gamit_apr_file_path)
+        #apr_file_name = os.path.basename(gamit_apr_file_path)
 
         # create D-file with station entries
         with open(D_file_path,'w') as fid:
@@ -351,18 +355,27 @@ class Session(Processing.Session):
             fid.write(" 1\n 1\n"+ 'lxyz.apr' + "\n"+ "\n\n\n");
 
             # now add number of stations that will be listed
-            fid.write(str(self.domesMgr.size()) + "\n");
+            fid.write(str(len(stn_list)) + "\n");
 
             # create entry for each station listed in domesMgr
-            for (stnid,dn) in self.domesMgr: fid.write("x" + stnid + "0.000\n")
+            for stnid in stn_list:
+                if not self.domesMgr.containsStnId(stnid):
+                    raise NapeosException('station not found in domes manager: '+stnid)
+
+                fid.write("x" + stnid + "0.000\n")
+
 
         # fin
         return D_file_path
 
-    def create_U_file(self,gamit_D_file_path):
+    def create_U_file(self, gamit_D_file_path):
 
         # get the path of the bin tar.gz file
         bin_tar_file_path = self.files['bin']
+
+        # make sure we have otl grid file first
+        if not os.path.isfile(OTL_GRID_PATH):
+            raise NapeosException("could not find otl.grd file at "+OTL_GRID_PATH)
 
         # extract the tar file with binaries to work dir
         with tarfile.open(bin_tar_file_path, "r:gz") as tid:
@@ -388,7 +401,7 @@ class Session(Processing.Session):
         D_file_name = os.path.basename(gamit_D_file_path);
 
         # file must start with 'l' (see create_D_file for more details)
-        os.symlink('gamit.apr', 'lxyz.apr')
+        if not os.path.islink('lxyz.apr'): os.symlink('gamit.apr', 'lxyz.apr')
 
         # make the command to execute
         exeStr = '../bin/grdtab.bin' + ' ' + D_file_name + ' ' + yearStr + ' ' + doyStr + ' '  '1.25 ' + 'otl.grid' + ' >> grdtab.out'
@@ -406,7 +419,7 @@ class Session(Processing.Session):
         # we're done!
         return status,U_file_path
 
-    def create_BLQ_file(self,gamit_U_file_path):
+    def create_BLQ_file(self, gamit_U_file_path):
 
         # if grdtab failed u_file_path could be empty
         if gamit_U_file_path is None: return
@@ -428,7 +441,7 @@ class Session(Processing.Session):
         blq_file_path = os.path.join(resources_dir,blq_file_name)
 
         with open(gamit_U_file_path,'r') as ufileid:
-            with open(blq_file_path,'w') as blqid:
+            with open(blq_file_path,'a') as blqid:
 
                 # for each line in the ufiles
                 for line in ufileid.readlines():
@@ -507,6 +520,40 @@ class Session(Processing.Session):
 
         # fin
         return blq_file_path
+
+    def create_OTL_file(self,gamit_apr_file_path,stn_list):
+
+        batchsz = 99
+
+        # compute number of batches
+        num_batches = int(math.floor(len(stn_list)/batchsz))
+
+        if len(stn_list) % batchsz != 0: num_batches += 1;
+
+        for i in range(0,max(1,num_batches)):
+
+            # compute the start and stop index into station list
+            start_indx =  (i+0)*batchsz - 0
+            stop_indx  =  (i+1)*batchsz - 1
+
+            # make sure not to overshoot length of list
+            stop_indx  = min(stop_indx,len(stn_list))
+
+            # extract batch of stations
+            batch_stn_list = stn_list[start_indx:stop_indx+1]
+
+            if len(batch_stn_list) == 0: continue
+
+            # create the D-file for OTL call
+            gamit_D_file_path = self.create_D_file(gamit_apr_file_path, batch_stn_list)
+
+            # create the U-file containing ocean loading coeffs
+            (status, gamit_U_file_path) = self.create_U_file(gamit_D_file_path)
+
+        # create the napeos BLQ file
+        napeos_BLQ_file_path = self.create_BLQ_file(gamit_U_file_path)
+
+        return napeos_BLQ_file_path
 
     def init_cleanup(self):
 

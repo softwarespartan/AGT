@@ -141,3 +141,6 @@ class Domes:
             fid.write(key + " " + self.domes[key]+"\n");
             
         fid.close();
+
+    def stn_list(self):
+        return self.domes.keys()
