@@ -26,9 +26,17 @@ class Session(Processing.Session):
         # do all the program independent stuff
         super(Session, self).initialize();
 
+        stns_with_apr = self.get_stns_with_apr();
+
+        print stns_with_apr
+
         # initialize DOMES for each station requested
         # note that site.dat, gps.apr, and D-file use only stns listed in domesMgr
         for stnid in self.stn_list:
+
+            if not stnid in stns_with_apr:
+                os.sys.stderr.write('excluding station not found in apr: %s\n'%stnid)
+                continue
 
             # parse the station id
             (ns,code) = Utils.parse_stnId(stnid)
@@ -39,6 +47,8 @@ class Session(Processing.Session):
 
         # get the resource bucket path
         bucket = self.get_resources_path();
+
+        print self.files['apr']
 
         # get the apr file that was created by parent init
         apr_file = glob.glob(os.path.join(bucket, '*.apr'));
@@ -104,6 +114,10 @@ class Session(Processing.Session):
 
         # create the custom cleanup script
         #self.files['teardown_script_path'] = self.__create_teardown_script();
+
+    def get_stns_with_apr(self):
+        with open(self.files['apr'],'r') as fid:
+            return [line.split()[0] for line in fid]
 
     def concatonate_station_info_files(self):
 
