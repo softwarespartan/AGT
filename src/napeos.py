@@ -200,9 +200,11 @@ class Session(Processing.Session):
 
                 # add the station to the domes mgr if it's not already defined
                 if not self.domesMgr.containsStnId(stnName):
-                    stnName, domesNumber = self.domesMgr.addStn(stnName);
-                else:
-                    domesNumber = self.domesMgr.domesForStnId(stnName);
+                    #stnName, domesNumber = self.domesMgr.addStn(stnName);
+                    print('excluding station info for station not defined in domes: '+stnName)
+                    continue
+
+                domesNumber = self.domesMgr.domesForStnId(stnName);
 
                 # control to print "S" or "-"
                 isFirstLine = True;
