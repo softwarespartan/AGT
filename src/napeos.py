@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os, glob, Processing, Resources, gamit, pyDomes, StnInfoLib, Utils, re, tarfile, shutil, pyDate, math
 
 ATX_FILE_PATH = "$HOME/db/files/atx/gps.atx";
