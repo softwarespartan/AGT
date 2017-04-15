@@ -247,8 +247,6 @@ class Session(object):
         print fmt % ('work directory',self.work_dir_path);
 
 
-    
-    
     def is_valid(self):
         
         if self.options['year'] is None        \
@@ -359,19 +357,19 @@ class Session(object):
                                              );
         
         # get the rnx files
-        self.files['rnx'] = Resources.get_rnx(                          
-                                              self.options['year'    ], 
+        self.files['rnx'] = Resources.get_rnx_parallel(
+                                              self.options['year'    ],
                                               self.options['doy'     ],
-                                              self.stn_list           , 
-                                              self.get_resources_path() 
+                                              self.stn_list           ,
+                                              self.get_resources_path()
                                              );
         
         # get the station info  files
-        self.files['stn_info'] = Resources.get_stn_info(                
-                                              self.options['year'    ], 
-                                              self.options['doy'     ], 
-                                              self.stn_list           , 
-                                              self.get_resources_path() 
+        self.files['stn_info'] = Resources.get_stn_info(
+                                              self.options['year'    ],
+                                              self.options['doy'     ],
+                                              self.stn_list           ,
+                                              self.get_resources_path()
                                              );
                          
         # get the apr files
@@ -387,7 +385,7 @@ class Session(object):
         
         if self.isDebug: os.sys.stdout.write('ignoring dispose() in debug mode ... \n'); return;
         
-        if self.work_dir_path != None:
+        if not self.work_dir_path is None:
             os.system('rm -rf '+self.work_dir_path);
        
        
@@ -573,7 +571,6 @@ def main():
         session.dump();
         
     session.initialize();
-        
 
 
 if __name__ == '__main__':

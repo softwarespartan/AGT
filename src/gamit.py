@@ -68,7 +68,7 @@ def wlapr2apr(aprFile):
         lineParts = re.split('\s+',line);
 
         # defensive check
-        if len(lineParts) != 7:
+        if len(lineParts) != 10:
             os.sys.stderr.write('invalid apr line: '+line+'\n'); continue;
             
         # parse the station id
@@ -80,7 +80,7 @@ def wlapr2apr(aprFile):
         try:
             # convert all the input to doubles
             X    = float(lineParts[1]); Y    = float(lineParts[2]); Z    = float(lineParts[3]);
-            sigX = float(lineParts[4]); sigY = float(lineParts[5]); sigZ = float(lineParts[6]);
+            sigE = float(lineParts[7]); sigN = float(lineParts[8]); sigU = float(lineParts[9]);
         except:
             os.sys.stderr.write('error parsing APR line: '+ line); continue;
         
@@ -95,8 +95,8 @@ def wlapr2apr(aprFile):
         # write the apr line to the file
         gamitAprFileHandle.write(aprline+'\n');
         
-        # create the sigma line
-        sigline = "%s %s_GPS     NNN    %5.3f %5.3f %5.3f" % (code.upper(),code.upper(),sigX,sigY,sigZ);
+        # create the sigma line (note NEU not ENU)
+        sigline = "%s %s_GPS     NNN    %5.3f %5.3f %5.3f" % (code.upper(),code.upper(),sigN,sigE,sigU);
         
         # write the sigma data to the file
         sittbl.write(sigline+'\n');
@@ -282,8 +282,7 @@ class Session(Processing.Session):
         
         # return the path for traceability
         return setup_file_path;
-      
-      
+
     def __create_run_script(self):
         
         year = Utils.get_norm_year_str(self.options['year']);
@@ -474,8 +473,7 @@ class Session(Processing.Session):
         
         # return path
         return run_file_path;
-    
-    
+
     def __create_teardown_script(self):
         
         # create normalized versions of the year and day of year
@@ -621,10 +619,8 @@ class Session(Processing.Session):
         os.system('chmod +x '+teardown_file_path);
         
         # return path
-        return teardown_file_path;                
+        return teardown_file_path;
     
-    
-    # @Overides
     def relative_solution_path(self):
         
         # create normalized versions of the year and day of year
@@ -687,7 +683,6 @@ class Session(Processing.Session):
             print "pushing sp3 file: ",file
             Resources.pushSNX(self.get_solution_bucket(prog_id), file);
      
-    # @Override
     def getStatus(self):
         
         # call super class definition

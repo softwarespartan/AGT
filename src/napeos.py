@@ -20,20 +20,26 @@ class Session(Processing.Session):
         # all the metadata needs coordinated DOMES numbers
         self.domesMgr = pyDomes.Domes()
 
+        # compute processing date
+        self.date = None;
+
     # @Override
     def initialize(self):
 
         # do all the program independent stuff
         super(Session, self).initialize();
 
-        stns_with_apr = self.get_stns_with_apr();
+        # create generic date objectcd
+        self.date = pyDate.Date(year=self.options['year'], doy=self.options['doy']);
 
-        print stns_with_apr
+        # figure out which stations have APR
+        stns_with_apr = self.get_stns_with_apr();
 
         # initialize DOMES for each station requested
         # note that site.dat, gps.apr, and D-file use only stns listed in domesMgr
         for stnid in self.stn_list:
 
+            # if there is no APR then do not add to DOMES
             if not stnid in stns_with_apr:
                 os.sys.stderr.write('excluding station not found in apr: %s\n'%stnid)
                 continue
@@ -44,24 +50,13 @@ class Session(Processing.Session):
             # add the station to the domes mgr if it's not already defined
             if not self.domesMgr.containsStnId(code): self.domesMgr.addStn(code);
 
-
         # get the resource bucket path
         bucket = self.get_resources_path();
 
-        print self.files['apr']
-
-        # get the apr file that was created by parent init
-        apr_file = glob.glob(os.path.join(bucket, '*.apr'));
-
-        # yell about it if not found
-        if len(apr_file) != 1:
-            raise NapeosException('problem identifying APR resources in ' + bucket);
-
-        # list to string
-        apr_file = apr_file[0];
+        apr_file_path = self.files['apr']
 
         # create gamit apr file for OTL computations
-        gamit_apr_file_path = gamit.wlapr2apr(os.path.join(bucket, apr_file))
+        gamit_apr_file_path = gamit.wlapr2apr(apr_file_path)
 
         # get the binaries for gamit (bin file path used by create_U_file)
         self.files['bin'] = Resources.get_bin('napeos', self.work_dir_path)
@@ -76,26 +71,15 @@ class Session(Processing.Session):
         napeos_station_dat_file_path = self.convert_station_info_to_dat(gamit_station_info_file_path)
 
         # convert the generic agt apr file to napeos crd file
-        napeos_crd_file_path = self.convert_apr_to_crd(apr_file)
+        napeos_crd_file_path = self.convert_apr_to_crd(apr_file_path)
 
         # create the site.dat file with domes numbers for each station
         napeos_site_dot_dat = self.create_site_dot_dat()
 
-        # create the D-file for OTL call
-        #gamit_D_file_path = self.create_D_file(
-        #    gamit_apr_file_path, self.domesMgr.stn_list()
-        #)
-
-        # create the U-file containing ocean loading coeffs
-        #(status,gamit_U_file_path) = self.create_U_file(gamit_D_file_path)
-
-        # create the napeos BLQ file
-        #napeos_BLQ_file_path = self.create_BLQ_file(gamit_U_file_path)
-
         napeos_BLQ_file_path = self.create_OTL_file(gamit_apr_file_path,self.domesMgr.stn_list())
 
         # clean up all this shit
-        #self.init_cleanup()
+        self.init_cleanup()
 
         # create the setup script for the job
         setup_script_file_path = self.create_setup_script()
@@ -105,15 +89,6 @@ class Session(Processing.Session):
 
         # create the teardown script for the job
         teardown_script_file_path = self.create_tear_down_script()
-
-        # create custom setup shell script
-        #self.files['setup_script_path'] = self.__create_setup_script();
-
-        # create custom run script
-        #self.files['run_script_path'] = self.__create_run_script();
-
-        # create the custom cleanup script
-        #self.files['teardown_script_path'] = self.__create_teardown_script();
 
     def get_stns_with_apr(self):
         with open(self.files['apr'],'r') as fid:
@@ -193,10 +168,10 @@ class Session(Processing.Session):
             fid.write("NSTADB    " + str(stnInfoFile.numberOfLines())+'\n')
 
             # add content for each station
-            for stnInfo in stnInfoFile:
+            for stnInfoObj in stnInfoFile:
 
                 # set the station name we're working with
-                stnName = stnInfo.getName().lower();
+                stnName = stnInfoObj.getName().lower();
 
                 # add the station to the domes mgr if it's not already defined
                 if not self.domesMgr.containsStnId(stnName):
@@ -212,22 +187,30 @@ class Session(Processing.Session):
                 # row header
                 tag = "S";
 
+                # get line for date
+                line = stnInfoObj.getStnInfo(self.date);
+
+                #make sure entry for date, if not move along
+                if line is None:
+                    print('excluding station info missing entry for date: '+stnName)
+                    continue
+
                 # for each line in stnInfoObj ...
-                for line in stnInfo:
+                #for line in stnInfoObj:
 
-                    startDateStr = "%4d/%2s/%2s-00:00:00.000000" % (
-                    line.startDate.year, mk2dstr(line.startDate.month), mk2dstr(line.startDate.day));
-                    stopDateStr = "%4d/%2s/%2s-00:00:00.000000" % (
-                    line.stopDate.year, mk2dstr(line.stopDate.month), mk2dstr(line.stopDate.day));
-                    rxVers = line.rx.vers;
+                startDateStr = "%4d/%2s/%2s-00:00:00.000000" % (
+                line.startDate.year, mk2dstr(line.startDate.month), mk2dstr(line.startDate.day));
+                stopDateStr = "%4d/%2s/%2s-00:00:00.000000" % (
+                line.stopDate.year, mk2dstr(line.stopDate.month), mk2dstr(line.stopDate.day));
+                rxVers = line.rx.vers;
 
-                    fid.write("%1s %4s GPS %10s %4d %9s %4s  0 %26s  0 %26s  %6.4f  %6.4f  %6.4f %-15s %4s %20s %-20s %-5s %-11s %-80s %-50s 1 %80s %-80s %10.2f %10.2f\n" % (
-                    tag, stnName.upper(), "", indx, domesNumber, stnName.upper(), startDateStr, stopDateStr, line.ant.n,
-                    line.ant.e, line.ant.ht, line.ant.type, line.ant.dome[0:4], line.ant.sn, line.rx.type, line.rx.sn[0:5],
-                    line.rx.vers[0:11], APR_FILE_PATH[0:80], "auto generated by info2dat.py", " ", ATX_FILE_PATH[0:80], 1575.42,
-                    1227.60))
+                fid.write("%1s %4s GPS %10s %4d %9s %4s  0 %26s  0 %26s  %6.4f  %6.4f  %6.4f %-15s %4s %20s %-20s %-5s %-11s %-80s %-50s 1 %80s %-80s %10.2f %10.2f\n" % (
+                tag, stnName.upper(), "", indx, domesNumber, stnName.upper(), startDateStr, stopDateStr, line.ant.n,
+                line.ant.e, line.ant.ht, line.ant.type, line.ant.dome[0:4], line.ant.sn, line.rx.type, line.rx.sn[0:5],
+                line.rx.vers[0:11], APR_FILE_PATH[0:80], "auto generated by info2dat.py", " ", ATX_FILE_PATH[0:80], 1575.42,
+                1227.60))
 
-                    if isFirstLine: tag = "-"
+                if isFirstLine: tag = "-"
 
                 # udpate index
                 indx +=1
@@ -284,8 +267,8 @@ class Session(Processing.Session):
                     # decompose the line
                     lineParts = re.split("\s+", line);
 
-                    if len(lineParts) != 7:
-                        os.sys.stderr.write("line: " + line + " is invalid.  apr line must have 7 fields but has "+str(len(lineParts)) +".  Use -h option\n");
+                    if len(lineParts) != 10:
+                        os.sys.stderr.write("line: " + line + " is invalid.  apr line must have 10 fields but has "+str(len(lineParts)) +".  Use -h option\n");
                         continue;
 
                     # every line has at least this
@@ -299,7 +282,6 @@ class Session(Processing.Session):
                     y    = float(lineParts[2]);
                     z    = float(lineParts[3]);
 
-                    # currently ENU not XYZ !!
                     sigX = float(lineParts[4]);
                     sigY = float(lineParts[5]);
                     sigZ = float(lineParts[6]);
@@ -539,12 +521,17 @@ class Session(Processing.Session):
 
     def create_OTL_file(self,gamit_apr_file_path,stn_list):
 
-        batchsz = 99
+        # depends on GAMIT max_dim (usually something like 85)
+        batchsz = 49
 
         # compute number of batches
         num_batches = int(math.floor(len(stn_list)/batchsz))
 
+        # if one extra iter if not perfect division
         if len(stn_list) % batchsz != 0: num_batches += 1;
+
+        # init none
+        napeos_BLQ_file_path = None
 
         for i in range(0,max(1,num_batches)):
 
@@ -566,8 +553,8 @@ class Session(Processing.Session):
             # create the U-file containing ocean loading coeffs
             (status, gamit_U_file_path) = self.create_U_file(gamit_D_file_path)
 
-        # create the napeos BLQ file
-        napeos_BLQ_file_path = self.create_BLQ_file(gamit_U_file_path)
+            # create the napeos BLQ file
+            napeos_BLQ_file_path = self.create_BLQ_file(gamit_U_file_path)
 
         return napeos_BLQ_file_path
 
@@ -579,19 +566,25 @@ class Session(Processing.Session):
         # misc stuff
         shutil.rmtree(os.path.join(self.work_dir_path, 'bin'))
 
-        # do it
-        os.remove(os.path.join(resources_dir,'dtemp0.000'        ))
-        os.remove(os.path.join(resources_dir,'u'                 ))
-        os.remove(os.path.join(resources_dir,'lxyz.apr'          ))
-        os.remove(os.path.join(resources_dir,'otl.grid'          ))
-        os.remove(os.path.join(resources_dir,'grdtab.out'        ))
-        os.remove(os.path.join(resources_dir,'GAMIT.status'      ))
-        os.remove(os.path.join(resources_dir,'sittbl.'           ))
-        os.remove(os.path.join(resources_dir,'gamit.station.info'))
-        os.remove(os.path.join(resources_dir,'gamit.apr'         ))
+        def try_remove_resource(fileName):
+            try:
+                os.remove(os.path.join(resources_dir, fileName))
+            except Exception as e:
+                os.sys.stderr.write(str(e) + "\n");
+
+        try_remove_resource('dtemp0.000'        )
+        try_remove_resource('u'                 )
+        try_remove_resource('lxyz.apr'          )
+        try_remove_resource('otl.grid'          )
+        try_remove_resource('grdtab.out'        )
+        try_remove_resource('GAMIT.status'      )
+        try_remove_resource('sittbl.'           )
+        try_remove_resource('gamit.station.info')
+        try_remove_resource('gamit.apr'         )
+
 
         # finally
-        os.remove(self.files['apr'])
+        try_remove_resource(os.path.basename(self.files['apr']))
 
     def create_setup_script(self):
 
@@ -607,8 +600,8 @@ class Session(Processing.Session):
                 export PATH=`pwd`/bin:${PATH}
 
                 # unpack the tar.gz files (bin and tables)
-                for file in $(ls *.gz );do gunzip -f $file;done
-                for file in $(ls *.tar);do tar -xf  $file;done
+                for file in $(ls *.gz );do gunzip -f  $file;done
+                for file in $(ls *.tar);do tar   -xf  $file;done
 
                 # clean up
                 #rm *.tar
@@ -629,18 +622,18 @@ class Session(Processing.Session):
             contents += \
                 """
                 # link bahn tables
-                ln -s %s sc/REF_GPS/mode/bahn/IGSFREE/bahn_sat.dat
-                ln -s %s sc/REF_GPS/mode/bahn/IGSFIX/bahn_sat.dat
+                ln -sf %s sc/REF_GPS/mode/bahn/IGSFREE/bahn_sat.dat
+                ln -sf %s sc/REF_GPS/mode/bahn/IGSFIX/bahn_sat.dat
 
                 """ % (bahn_sat_dat_file_name,bahn_sat_dat_file_name);
 
             # link metadata files the to correct place
             contents +=\
                 """
-                ln -s `pwd`/resources/station.dat db/tables/station.dat
-                ln -s `pwd`/resources/site.dat    db/tables/site.dat
-                ln -s `pwd`/resources/gps.apr     db/files/stat/gps.apr
-                ln -s `pwd`/resources/otl.blq     db/files/stat/FES2004_CMC.blq
+                ln -sf `pwd`/resources/station.dat db/tables/station.dat
+                ln -sf `pwd`/resources/site.dat    db/tables/site.dat
+                ln -sf `pwd`/resources/gps.apr     db/files/stat/gps.apr
+                ln -sf `pwd`/resources/otl.blq     db/files/stat/FES2004_CMC.blq
 
                 """
 
@@ -651,14 +644,27 @@ class Session(Processing.Session):
                 cd resources
 
                 # decompress and uncompact all the d.Z file
-                for file in $(ls *.[0-9][0-9]d.*);do  gunzip -f $file; done
-                for file in $(ls *.[0-9][0-9]d);  do  crx2rnx.bin    $file; done
+                #for file in $(ls *.[0-9][0-9]d.*);do  gunzip -f $file; done
+                #for file in $(ls *.[0-9][0-9]d);  do  crx2rnx.bin    $file; done
+
+                ls *.[0-9][0-9]d.* | xargs -n1 -P8 -I% gunzip      -f %
+                ls *.[0-9][0-9]d   | xargs -n1 -P8 -I% crx2rnx.bin -f % 
+                
+                function hello {
+                    OUTFILE=tmp.${1};
+                    cc2noncc.bin $1 tmp.${1} ../db/tables/p1c1bias.dat >/dev/null;
+                    [[ -f ${OUTFILE} ]] && mv ${OUTFILE} $file;
+                }
+                
 
                 # run cc2noncc for each existing rinex file
                 for file in $(ls *[0-9][0-9]o);do
                     cc2noncc.bin $file tmp ../db/tables/p1c1bias.dat >/dev/null;
                     [[ -f tmp ]] && mv tmp $file;
                 done
+                
+                #ls *[0-9][0-9]o | xargs -n1 -P8 -I% hello %
+                
 
                 # up compress sp3 files
                 gunzip *.sp3*
@@ -674,9 +680,9 @@ class Session(Processing.Session):
                 cd input
 
                 # link resources for input
-                ln -s ../resources/*[0-9][0-9]o ./
-                ln -s ../resources/*.sp3        ./
-                ln -s *.sp3 orbit.sp3
+                ln -sf ../resources/*[0-9][0-9]o ./
+                ln -sf ../resources/*.sp3        ./
+                ln -sf *.sp3 orbit.sp3
 
                 # restore working dir
                 cd ..
@@ -684,14 +690,14 @@ class Session(Processing.Session):
                 """
 
             # generate pydate for date of job
-            date = pyDate.Date(year=self.options['year'], doy=self.options['doy'])
+            #date = pyDate.Date(year=self.options['year'], doy=self.options['doy'])
 
             # create date strings
-            year = str(date.year);  month = str(date.month);  day = str(date.day);
+            year = str(self.date.year);  month = str(self.date.month);  day = str(self.date.day);
 
             # make sure that both month and day are two digits
-            if date.month < 10: month = '0'+month
-            if date.day   < 10: day   = '0'+day
+            if self.date.month < 10: month = '0'+month
+            if self.date.day   < 10: day   = '0'+day
 
             # create $HOME resolution
             contents +=\
@@ -760,18 +766,18 @@ class Session(Processing.Session):
     def create_tear_down_script(self):
 
         # initialize a date object
-        date = pyDate.Date(year=self.options['year'], doy=self.options['doy' ])
+        #date = pyDate.Date(year=self.options['year'], doy=self.options['doy' ])
 
         # extract the gps week and day of week
-        gps_week     = date.gpsWeek
-        gps_week_day = date.gpsWeekDay
+        gps_week     = self.date.gpsWeek
+        gps_week_day = self.date.gpsWeekDay
 
         # extract the gps week and convert to string
-        gpsWeek_str    = str(date.gpsWeek   )
-        gpsWeekDay_str = str(date.gpsWeekDay)
+        gpsWeek_str    = str(self.date.gpsWeek   )
+        gpsWeekDay_str = str(self.date.gpsWeekDay)
 
         # normalize gps week string
-        if date.gpsWeek < 1000: gpsWeek_str = '0' + gpsWeek_str
+        if self.date.gpsWeek < 1000: gpsWeek_str = '0' + gpsWeek_str
 
         # create file path to the teardown script
         teardown_file_path = os.path.join(self.work_dir_path, 'teardown.sh')

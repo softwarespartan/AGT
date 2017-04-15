@@ -3,6 +3,8 @@ from boto.s3.connection import S3Connection,OrdinaryCallingFormat
 
 import re,os,pyDate,Utils;
 
+import multiprocessing
+
 WL_SP3_BUCKET = 'com.widelane.sp3'         ;
 WL_NAV_BUCKET = 'com.widelane.nav'         ;
 WL_RNX_BUCKET = 'rinex'                    ;
@@ -110,6 +112,10 @@ def get_rnx(year,doy,stn_list,outdir=None):
     
     # init
     rnx_file_list = list();
+
+    # init s3 connection to the metadata bucket
+    conn = S3Connection(calling_format=OrdinaryCallingFormat());
+    bucket = conn.get_bucket(WL_RNX_BUCKET);
     
     for stnId in stn_list:
     
@@ -127,11 +133,8 @@ def get_rnx(year,doy,stn_list,outdir=None):
         
         # create key path to file in rnx
         rnx_key_path = '/'.join([ns,year,doy,rnx_file_name]);
-        
-        # init s3 connection to the metadata bucket
-        conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
-        bucket    = conn.get_bucket(WL_RNX_BUCKET)     ;
-        bucketKey = bucket.get_key(rnx_key_path)          ;
+
+        bucketKey = bucket.get_key(rnx_key_path)       ;
         
         if bucketKey is None:
             # create the file name of the rnx with session 1
@@ -157,11 +160,90 @@ def get_rnx(year,doy,stn_list,outdir=None):
         rnx_file_list.append(rnx_file_path);
         
     return rnx_file_list;
+
+def action(params):
+    params[0].get_contents_to_filename(params[1])
+
+def get_rnx_parallel(year, doy, stn_list, outdir=None):
+
+    year = Utils.get_norm_year_str(year);
+    doy = Utils.get_norm_doy_str(doy);
+
+    # init
+    rnx_file_list = list();
+
+    # init s3 connection to the metadata bucket
+    conn = S3Connection(calling_format=OrdinaryCallingFormat());
+    bucket = conn.get_bucket(WL_RNX_BUCKET);
+
+    list_of_bucket_keys = list()
+
+    for stnId in stn_list:
+
+        # parse the station id and extract the 4-char station code
+        (ns, code) = Utils.parse_stnId(stnId);
+
+        # create the file name of the sp3
+        rnx_file_name = code + doy + '0.' + year[2:] + 'd.Z';
+
+        # set outdir to current directory if not set
+        if outdir is None: outdir = '.';
+
+        # create the sp3 file path
+        rnx_file_path = os.path.join(outdir, rnx_file_name);
+
+        # create key path to file in rnx
+        rnx_key_path = '/'.join([ns, year, doy, rnx_file_name]);
+
+        bucketKey = bucket.get_key(rnx_key_path);
+
+        if bucketKey is None:
+            # create the file name of the rnx with session 1
+            rnx_file_name = code + str(doy) + '1.' + str(year)[2:] + 'd.Z';
+
+            # create key path to file in s3
+            rnx_key_path = '/'.join([ns, str(year), str(doy), rnx_file_name]);
+
+            # check for session 1 file
+            bucketKey = bucket.get_key(rnx_key_path);
+
+            if bucketKey is None:
+                os.sys.stderr.write('rnx resource: ' + stnId + ' could not be located for ' + year + ' ' + doy + '\n');
+                continue;
+
+        # create the s3 object
+        bucketKey.key = rnx_key_path;
+
+        # enqueue bucket key for download
+        list_of_bucket_keys.append((bucketKey,rnx_file_path));
+
+        # update list of rinex file procesed
+        rnx_file_list.append(rnx_file_path);
+
+
+    poolsz = min(16,len(rnx_file_list))
+    pool = multiprocessing.Pool(poolsz);
+    pool.map(action, list_of_bucket_keys)
+    pool.close()
+    pool.join()
+
+    # pull the file
+    #bucketKey.get_contents_to_filename(rnx_file_path);
+
+    # add the rinex file path to the file list
+
+    return rnx_file_list;
         
 def get_stn_info(year,doy,stn_list,outdir=None):
     
     # init
     file_list = list();
+
+    # init s3 connection to the metadata bucket
+    conn = S3Connection(calling_format=OrdinaryCallingFormat());
+    bucket = conn.get_bucket(WL_STN_BUCKET);
+
+    list_of_bucket_keys = list()
     
     for stnId in stn_list:
     
@@ -176,10 +258,7 @@ def get_stn_info(year,doy,stn_list,outdir=None):
         
         # next, create the path for the station info file
         stn_info_file_path = os.path.join(outdir,stn_info_file_name);
-        
-        # init s3 connection to the metadata bucket
-        conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
-        bucket    = conn.get_bucket(WL_STN_BUCKET)        ;
+
         bucketKey = bucket.get_key(stn_info_file_name)    ;
         
         # let the user know that the file does not exist and continue
@@ -188,13 +267,22 @@ def get_stn_info(year,doy,stn_list,outdir=None):
             continue;
         
         # create the s3 object
-        bucketKey.key = stn_info_file_name;  
-        
-        # pull the file
-        bucketKey.get_contents_to_filename(stn_info_file_path);
-        
+        bucketKey.key = stn_info_file_name;
+
+        # enqueue
+        list_of_bucket_keys.append((bucketKey,stn_info_file_path))
+
         # add to list of files
         file_list.append(stn_info_file_path);
+
+        # pull the file
+        bucketKey.get_contents_to_filename(stn_info_file_path);
+
+    poolsz = min(16, len(file_list))
+    pool = multiprocessing.Pool(poolsz);
+    pool.map(action, list_of_bucket_keys)
+    pool.close()
+    pool.join()
         
     return file_list;
         

@@ -16,9 +16,9 @@ if __name__ == '__main__':
     from boto.s3.connection import OrdinaryCallingFormat
 
     # init vars
-    namespace = 'g08c.gamit'
+    namespace = 'g08d.gamit'
     bucketId  = 'com.widelane.apr'
-    inFile    = '/Users/abelbrown/Dropbox/stk/data/apr/g08c_apr.mat'
+    inFile    = '/Users/abelbrown/Dropbox/stk/data/apr/g08d_apr.mat'
     
     # init s3 connection to the metadata bucket
     conn      = S3Connection(calling_format=OrdinaryCallingFormat())
@@ -31,14 +31,14 @@ if __name__ == '__main__':
     for epoch in ts.epochs:
         
         d      = pyDate.Date(fyear=epoch)
-        aprstr =  str(epoch)+'\n'
+        aprstr = str(epoch)+'\n'
         
         numstn = 0;
         
-        for stnId,xyz,sigXYZ in ts.spvsWithSigmaForEpoch(epoch):
+        for stnId,xyz,sigXYZ,sigENU in ts.spvsWithSigmaForEpoch(epoch):
             
             # getting sig ENU from mike, GAMIT wants neu
-            n = sigXYZ[1]; e = sigXYZ[0]; u = sigXYZ[2];
+            e = sigENU[0]; n = sigENU[1]; u = sigENU[2];
             
             # xyz to ned trasformation matrix
             #xTn    = np.mat(  pyCoords.xTn(xyz)      ); 
@@ -59,11 +59,16 @@ if __name__ == '__main__':
             stnId = stnId.lower().replace("_",".");
             
             # create format string from xyz and sigma
-            xyz    = "%14.4f %14.4f %14.4f" % tuple(xyz   );
-            sigENU = "%9.4f %9.4f %9.4f"    % tuple((n,e,u));
-            #sigXYZ = "%9.4f %9.4f %9.4f"    % tuple(sigXYZ);
-            
-            aprstr += stnId + " " + xyz + " " + sigENU +"\n";
+            xyz_str    = "%14.4f %14.4f %14.4f" % tuple(xyz   );
+
+            # gamit wants NEU (not ENU) sigmas
+            sigENU_str = "%9.4f %9.4f %9.4f"    % tuple(sigENU);
+
+            # napeos wants XYZ sigmas
+            sigXYZ_str = "%9.4f %9.4f %9.4f"    % tuple(sigXYZ);
+
+            # add station apr string to the output
+            aprstr += stnId + " " + xyz_str + " " + sigXYZ_str + " " +sigENU_str + "\n";
             
             # update station count
             numstn += 1; 

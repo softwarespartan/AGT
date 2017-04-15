@@ -468,8 +468,7 @@ class StnInfoObj():
         else:
             print repr(type(input)) +" not recognized!"
             raise StnInfoParseException('input must be string, file path, or StnInfoLine object!!');
-        
-        
+
     def addStnInfoLineSrc(self,input):
         
         shouldCloseSrc = False;
@@ -486,7 +485,6 @@ class StnInfoObj():
                 
         if shouldCloseSrc:
             src.close();
-            
             
     def addStnInfoLineObj(self,anotherStnInfoLineObj):
         
@@ -526,8 +524,7 @@ class StnInfoObj():
         lineList = sorted(self.stnInfoLineList, key=lambda obj: obj.startDate);
         for line in self.stnInfoLineList:
             line.Print(fid);
-            
-            
+
     def getName(self):
         if len(self.stnInfoLineList) == 0:
             return None;
@@ -565,18 +562,13 @@ class StnInfoObj():
             fid.close();
             
     def getStnInfo(self,date):
-        
-        targetDate = date;
-        
-        # loop over lines of the station info and check for inclusion
         for line in self.stnInfoLineList:
-            if targetDate >= line.startDate \
-                    and targetDate <= line.stopDate:
-                return line;
-                break;
-            
+            if line.startDate <= date <= line.stopDate:
+                return line
+        return None
+
     def stnInfoForYearDoy(self,year,doy):
-        return self.getStnInfo(pyDate.Date(year=year,doy=doy));
+        return self.getStnInfo(pyDate.Date(year=year,doy=doy))
     
     def __iter__(self):
         return self
@@ -584,7 +576,7 @@ class StnInfoObj():
     # iterator protocol
     def next(self):
         
-        if self.iterList ==None:
+        if self.iterList is None:
             self.iterList = sorted(self.stnInfoLineList, key=lambda obj: obj.startDate);
         
         if self.iterIndx > len(self.iterList)-1:
