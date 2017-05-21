@@ -284,13 +284,21 @@ class Session(Processing.Session):
                     y    = float(lineParts[2]);
                     z    = float(lineParts[3]);
 
-                    sigX = float(lineParts[4]);
-                    sigY = float(lineParts[5]);
-                    sigZ = float(lineParts[6]);
+                    #sigX = float(lineParts[4]);
+                    #sigY = float(lineParts[5]);
+                    #sigZ = float(lineParts[6]);
 
-                    sigX = ("%5.3f" % sigX)[0:5];
-                    sigY = ("%5.3f" % sigY)[0:5];
-                    sigZ = ("%5.3f" % sigZ)[0:5];
+                    sigX = 99.99;
+                    sigY = 99.99;
+                    sigZ = 99.99;
+
+                    #sigX = ("%5.3f" % sigX)[0:5];
+                    #sigY = ("%5.3f" % sigY)[0:5];
+                    #sigZ = ("%5.3f" % sigZ)[0:5];
+
+                    sigX = ("%5.2f" % sigX)[0:5];
+                    sigY = ("%5.2f" % sigY)[0:5];
+                    sigZ = ("%5.2f" % sigZ)[0:5];
 
                     # print the line to the apr file
                     printAsCrd(fid, self.domesMgr.domesForStnId(stnId), stnId, x, y, z, sigX, sigY, sigZ);
