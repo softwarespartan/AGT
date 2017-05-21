@@ -894,9 +894,9 @@ def main():
 
     finally:
 
-        print("finally, all done")
+        #print("finally, all done")
 
-        #session.dispose();
+        session.dispose();
 
 
 if __name__ == '__main__':
