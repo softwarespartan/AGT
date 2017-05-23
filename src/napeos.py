@@ -235,7 +235,7 @@ class Session(Processing.Session):
         # local helper function
         def printAsCrd(dst, domesNumber, stnId, x, y, z, sigX, sigY, sigZ):
 
-            xyzStr = "%9s %4s %9s     GPS %4s                  %12.3f %12.3f %12.3f %5s %5s %5s OSU" % (
+            xyzStr = "%9s %4s %9s     GPS %4s                  %12.3f %12.3f %12.3f %5s %5s %5s I" % (
                 domesNumber, stnId.upper(), domesNumber, stnId.upper(), x, y, z, sigX, sigY, sigZ)
             velStr = "%9s %4s %9s         %4s                  %12.3f %12.3f %12.3f %5.3f %5.3f %5.3f I" % (
                 domesNumber, "", "", "", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
@@ -294,7 +294,7 @@ class Session(Processing.Session):
 
                     #sigX = ("%5.3f" % sigX)[0:5];
                     #sigY = ("%5.3f" % sigY)[0:5];
-                    #sigZ = ("%5.3f" % sigZ)[0:5]
+                    #sigZ = ("%5.3f" % sigZ)[0:5];
 
                     sigX = ("%5.2f" % sigX)[0:5];
                     sigY = ("%5.2f" % sigY)[0:5];
