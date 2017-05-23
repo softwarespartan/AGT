@@ -294,7 +294,7 @@ class Session(Processing.Session):
 
                     #sigX = ("%5.3f" % sigX)[0:5];
                     #sigY = ("%5.3f" % sigY)[0:5];
-                    #sigZ = ("%5.3f" % sigZ)[0:5];
+                    #sigZ = ("%5.3f" % sigZ)[0:5]
 
                     sigX = ("%5.2f" % sigX)[0:5];
                     sigY = ("%5.2f" % sigY)[0:5];
