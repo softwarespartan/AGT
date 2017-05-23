@@ -237,7 +237,7 @@ class Session(Processing.Session):
 
             xyzStr = "%9s %4s %9s     GPS %4s                  %12.3f %12.3f %12.3f %5s %5s %5s OSU" % (
                 domesNumber, stnId.upper(), domesNumber, stnId.upper(), x, y, z, sigX, sigY, sigZ)
-            velStr = "%9s %4s %9s         %4s                  %12.3f %12.3f %12.3f %5.3f %5.3f %5.3f OSU" % (
+            velStr = "%9s %4s %9s         %4s                  %12.3f %12.3f %12.3f %5.3f %5.3f %5.3f I" % (
                 domesNumber, "", "", "", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
             dst.write(xyzStr + "\n");
