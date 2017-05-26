@@ -221,7 +221,7 @@ def get_rnx_parallel(year, doy, stn_list, outdir=None):
         rnx_file_list.append(rnx_file_path);
 
 
-    poolsz = min(16,len(rnx_file_list))
+    poolsz = max(1,min(16,len(rnx_file_list)))
     pool = multiprocessing.Pool(poolsz);
     pool.map(action, list_of_bucket_keys)
     pool.close()
@@ -626,14 +626,45 @@ def list_resources(key_path,ext=None,outdir=None):
         
     return res_file_list;
 
+def soln_exists(date,expt,org,net='n0'):
+
+    # init s3 connection
+    conn = S3Connection(calling_format=OrdinaryCallingFormat());
+
+    # create a bucket object into s3
+    bucket = conn.get_bucket(WL_SOLN_BUCKET);
+
+    # construct the relative path to where the file should be
+    relPath = str(date.year)+"/"+str(date.doy)+"/"+expt+"/"+org+"/"+net
+
+    # construct the name of the sinex file
+    fileName = org+str(date.gpsWeek)+str(date.gpsWeekDay)+".snx.gz"
+
+    # full file path
+    fullFilePath = relPath + "/" + fileName
+
+    # create a file in to the bucket
+    key = Key(bucket,fullFilePath)
+
+    return key.exists(),fullFilePath
+
 
 if __name__ == '__main__':
     
     #files = get_snx('2009/123/odot/g06','~/tmp');
     #for f in files: print f;
     
-    files = list_resources('2009/123/odot/g06/n1','.mat.gz');
-    for f in files: print f;
+    #files = list_resources('2009/123/odot/g06/n1','.mat.gz');
+    #for f in files: print f;
+
+    date = pyDate.Date(year=2016,doy=101)
+    expt = 'glbf'
+    org  = 'n08'
+    net  = 'n0'
+
+    exists = soln_exists(date,expt,org,net)
+
+    print("file: "+exists[1]+", "+str(exists[0]))
         
     
     

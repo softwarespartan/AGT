@@ -12,6 +12,12 @@ class NapeosException(Exception):
     def __str__(self):
         return repr(self.value)
 
+class LazyException(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
 class Session(Processing.Session):
 
     def __init__(self):
@@ -28,11 +34,23 @@ class Session(Processing.Session):
     # @Override
     def initialize(self):
 
+        # create date object
+        self.date = pyDate.Date(year=self.options['year'], doy=self.options['doy']);
+
+        # check for pre-existing solution if lazy
+        (status,key) = Resources.soln_exists(
+                self.date,
+                self.options['expt'],
+                self.options['org'],
+                self.options['network_id']
+        )
+
+        if status: raise LazyException("file exists: "+key)
+
+
         # do all the program independent stuff
         super(Session, self).initialize();
 
-        # create generic date objectcd
-        self.date = pyDate.Date(year=self.options['year'], doy=self.options['doy']);
 
         # figure out which stations have APR
         stns_with_apr = self.get_stns_with_apr();
@@ -899,6 +917,11 @@ def main():
 
         # blab about the exception details and exit
         os.sys.stderr.write(str(err));
+
+    except LazyException as lazystop:
+
+        # blab about it
+        os.sys.stderr.write(str(lazystop))
 
     finally:
 

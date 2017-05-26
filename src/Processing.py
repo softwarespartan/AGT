@@ -70,6 +70,8 @@ class Session(object):
         self.files = dict();
         
         self.isDebug = False;
+
+        self.isLazy = False;
                        
     def configure_with_args(self,argv):
         
@@ -77,7 +79,10 @@ class Session(object):
         longArgs = [op+'=' for op in self.options.keys()];
         
         # tack on the stn src and debug args
-        longArgs.append('stn='); longArgs.append('src='); longArgs.append('debug')
+        longArgs.append('stn=' )
+        longArgs.append('src=' )
+        longArgs.append('debug')
+        longArgs.append('lazy' )
         
         # prep argv options
         for e in argv:
@@ -118,6 +123,9 @@ class Session(object):
             
             # process debug option
             if option == 'debug': self.isDebug = True;
+
+            # process lazy option
+            if option == 'lazy': self.isLazy = True;
             
         # ok one last thing, compute a working directory name
         self.work_dir_path = self.compute_work_dir_path();    
@@ -320,7 +328,8 @@ class Session(object):
               
         # make sure that work directory has been initialized
         if not self.is_valid():
-            raise SessionException('invalid session state');    
+            raise SessionException('invalid session state');
+
          
         # make sure the the temporary directory does not already exist
         if os.path.isdir(self.work_dir_path):
@@ -339,6 +348,8 @@ class Session(object):
             
             # unsuccessful attempt
             raise SessionException(str(e));
+
+
         
         # get the sp3 files
         self.files['sp3'] = Resources.get_sp3(                          
@@ -379,7 +390,6 @@ class Session(object):
                                               self.options['dns'     ], 
                                               self.get_resources_path() 
                                              );
-     
          
     def dispose(self):
         
