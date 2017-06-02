@@ -14,6 +14,9 @@ reservations = ec2_conn.get_all_instances();
 # initialize count of instances
 inst_count = 0;
 
+# number of terminated instances
+num_term = 0;
+
 # go through each instance
 for r in reservations:
     
@@ -67,7 +70,10 @@ for r in reservations:
                     continue
             
             # if the average cpu usage is OK then don't print termination
-            if cpu_avg_usage >= CPU_THRESHOLD: TERM='';
+            if cpu_avg_usage >= CPU_THRESHOLD:
+                TERM='';
+            else:
+                num_term +=1;
                 
             # print off some interesting information
             print '%10s    %10s    %10s  %7.3f   %10s' % (inst.id,
@@ -81,4 +87,5 @@ for r in reservations:
                 inst.terminate();
         
 # print the total number of running instances
-print "number of running instances: ",inst_count
+print "number of running instances: ",inst_count,", terminated: ", str(num_term)
+

@@ -16,9 +16,9 @@ if __name__ == '__main__':
     from boto.s3.connection import OrdinaryCallingFormat
 
     # init vars
-    namespace = 'g08d.gamit'
+    namespace = 'g08e.gamit'
     bucketId  = 'com.widelane.apr'
-    inFile    = '/Users/abelbrown/Dropbox/stk/data/apr/g08d_apr.mat'
+    inFile    = '/Users/abelbrown/Dropbox/stk/data/apr/g08e_apr.mat'
     
     # init s3 connection to the metadata bucket
     conn      = S3Connection(calling_format=OrdinaryCallingFormat())

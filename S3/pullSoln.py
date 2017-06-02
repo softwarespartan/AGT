@@ -12,8 +12,8 @@ def run(dt,outdir):
     #expt = ['glbl','glbf','glbd','anet','gnet','capp','swpp','tigg','glbk'];
     #expt = ['glbk'];
     #expt = ['anet','gnet'];
-    expt = ['glbk'];
-    org  = ['g09'];
+    expt = ['glbf'];
+    org  = ['n08'];
     
     for e in expt:
         for o in org:
@@ -31,7 +31,7 @@ def action(dt):
     
     try:
         #run(dt,'/Volumes/PROMISE_PEGASUS/data/g06/data/');
-        run(dt,'/Users/abelbrown/data');
+        run(dt,'/Users/abelbrown/data/n08');
     except:
         print "Unexpected error:", os.sys.exc_info()[0];
         
@@ -39,8 +39,8 @@ def action(dt):
 def main():
     
     # create start and stop dates for the run
-    start_date = pyDate.Date(year=2016,doy=1);
-    end_date   = pyDate.Date(year=2016,doy=330);
+    start_date = pyDate.Date(year=2000,doy=1);
+    end_date   = pyDate.Date(year=2017,doy=1);
         
     # init queue for dates
     dates = list();
@@ -49,7 +49,7 @@ def main():
     dt = start_date;
     
     # populate the date queue
-    while(dt <= end_date):
+    while dt <= end_date :
                 
         # add the date to the queue
         dates.append(dt);

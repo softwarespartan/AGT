@@ -1,5 +1,5 @@
 
-JOB_QUEUE = 'com_widelane_jobstats';
+JOB_QUEUE = 'com_widelane_nodestats';
 
 from boto.sqs.connection import SQSConnection
 from boto.sqs.message    import Message
