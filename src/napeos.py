@@ -35,7 +35,7 @@ class Session(Processing.Session):
     def initialize(self):
 
         # create date object
-        self.date = pyDate.Date(year=self.options['year'], doy=self.options['doy']);
+        self.date = pyDate.Date(year=self.options['year'], doy=self.options['doy'])
 
         # check for pre-existing solution if lazy
         (solutionAlreadyExists,key) = Resources.soln_exists(
