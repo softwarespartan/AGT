@@ -38,14 +38,15 @@ class Session(Processing.Session):
         self.date = pyDate.Date(year=self.options['year'], doy=self.options['doy']);
 
         # check for pre-existing solution if lazy
-        (status,key) = Resources.soln_exists(
+        (solutionAlreadyExists,key) = Resources.soln_exists(
                 self.date,
                 self.options['expt'],
                 self.options['org'],
                 self.options['network_id']
         )
 
-        if status: raise LazyException("file exists: "+key)
+        if solutionAlreadyExists and self.isLazy:
+            raise LazyException("file exists: "+key)
 
 
         # do all the program independent stuff
