@@ -12,12 +12,6 @@ class NapeosException(Exception):
     def __str__(self):
         return repr(self.value)
 
-class LazyException(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
-
 class Session(Processing.Session):
 
     def __init__(self):
@@ -46,7 +40,7 @@ class Session(Processing.Session):
         )
 
         if solutionAlreadyExists and self.isLazy:
-            raise LazyException("file exists: "+key)
+            raise Processing.LazyException("file exists: "+key)
 
 
         # do all the program independent stuff

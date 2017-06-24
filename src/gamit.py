@@ -117,7 +117,21 @@ class Session(Processing.Session):
         
     # @Override    
     def initialize(self):
-        
+
+        # create date object
+        self.date = pyDate.Date(year=self.options['year'], doy=self.options['doy'])
+
+        # check for pre-existing solution if lazy
+        (solutionAlreadyExists, key) = Resources.soln_exists(
+            self.date,
+            self.options['expt'],
+            self.options['org'],
+            self.options['network_id']
+        )
+
+        if solutionAlreadyExists and self.isLazy:
+            raise Processing.LazyException("file exists: " + key)
+
         # do all the program independent stuff
         super(Session,self).initialize();
         
