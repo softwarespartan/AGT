@@ -270,7 +270,7 @@ class Session(Processing.Session):
                         cat sittbl. > tmp;
         
                         # add the missing entry to the temp file
-                        echo "${name} ${name}_GPS     NNN    9.999 9.999 9.999" >> tmp;
+                        echo "${name} ${name}_GPS     NNN    99.99 99.99 99.99" >> tmp;
                         
                         # restore the apr sigma file 
                         mv tmp sittbl.; 
@@ -323,6 +323,9 @@ class Session(Processing.Session):
         contents = \
         """
         #!/bin/bash
+        
+        # should we iterate solution
+        SHOULD_ITERATE=%s
 
         # set max depth for recursion
         MAX_LEVEL=3;
@@ -362,7 +365,7 @@ class Session(Processing.Session):
         
         # do the damn thing 
         sh_gamit -expt $EXPT -d $YEAR $DOY -orbt file -minspan $MIN_SPAN -noftp -remakex Y -eop $EOP """ \
-        % (self.options['expt'],year,doy,self.options['minspan'],self.options['eop_type'],self.options['org'],gpsWeek_str,str(date.gpsWeekDay));
+        % (self.options['should_iterate'],self.options['expt'],year,doy,self.options['minspan'],self.options['eop_type'],self.options['org'],gpsWeek_str,str(date.gpsWeekDay));
 
         # if we're in debug mode do not pipe output to file
         if not self.isDebug: contents += """ &> $OUT_FILE; """;
@@ -459,8 +462,13 @@ class Session(Processing.Session):
         # see if any of the coordinates were updated, exit if not
         grep Updated ./solutions/*/l*.*; [ $? -ne 0 ] && exit 
         
+        # if we should not iterate then exit now
+        [ $SHOULD_ITERATE == "no" ] && exit
+        
         # recreate the apr file with updated coordinates minus the comments
         sed -e 's/Updated from l.....\.[0-9][0-9][0-9]//g' ./solutions/*/l*.* > ./resources/gamit.apr;
+        
+        # I think we should copy over the gamit.apr
         
         # copy over an updated gfile if it exists
         #[ -e ./solutions/*/gfilea.* ] && mv -f ./solutions/*/gfilea.* ./resources/gfile%s.%s
@@ -473,7 +481,7 @@ class Session(Processing.Session):
         [ $level -le $MAX_LEVEL ] && rm -rf ./solutions/*;
         
         # do another iteration
-        ./run.sh $level;
+        [ $SHOULD_ITERATE == "yes" ] && ./run.sh $level;
         
         """ % (year[-1],doy);
         
@@ -704,15 +712,27 @@ class Session(Processing.Session):
         
         # out files to match
         out_file_descriptor = os.path.join(self.get_local_solutions_dir(),'*.out*');
+
+        # soln files to match
+        soln_file_descriptor = os.path.join(self.get_local_solutions_dir(), '*.snx*');
             
         # look for out files to get status from
         out_file_list = glob.glob(out_file_descriptor);
+
+        # look for soln files to get status from
+        soln_file_list = glob.glob(soln_file_descriptor);
         
         # if no out files ... not a good sign
         if len(out_file_list) == 0:
             status['status'] = False;
             return status;
-        
+
+        # if no solution files ... oi vey
+        if len(soln_file_list) == 0:
+            status['solution'] = False;
+        else:
+            status['solution'] = True;
+
         # create regular expression to match keyword
         pattern = re.compile('.*FATAL.*');
         

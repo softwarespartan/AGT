@@ -44,33 +44,35 @@ class Reflect(object):
 
     # noinspection PyBroadException
     def __get_current_spot_price(self, instanceType,availabilityZone):
-        
-        # create iso datetime string
-        start_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000Z");
-        
-        # create connection to ec2
-        conn = boto.ec2.connection.EC2Connection();
 
-        productDescription = 'Linux/UNIX';
-        
-        # get the current price
-        prices = conn.get_spot_price_history(
-                                             instance_type=instanceType        ,
-                                             start_time=start_time             ,
-                                             availability_zone=availabilityZone,
-                                             product_description=productDescription
-                                            )
-        
-        # make sure that we have at least 1 price to return 
-        if len(prices) == 0:
-            productDescription = 'Linux/UNIX (Amazon VPC)';
-            prices = conn.get_spot_price_history(
-                                             instance_type=instanceType        ,
-                                             start_time=start_time             ,
-                                             availability_zone=availabilityZone,
-                                             product_description=productDescription
-                                            );
         try:
+
+            # create iso datetime string
+            start_time = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.000Z");
+
+            # create connection to ec2
+            conn = boto.ec2.connection.EC2Connection();
+
+            productDescription = 'Linux/UNIX';
+
+            # get the current price
+            prices = conn.get_spot_price_history(
+                                                 instance_type=instanceType        ,
+                                                 start_time=start_time             ,
+                                                 availability_zone=availabilityZone,
+                                                 product_description=productDescription
+                                                )
+
+            # make sure that we have at least 1 price to return
+            if len(prices) == 0:
+                productDescription = 'Linux/UNIX (Amazon VPC)';
+                prices = conn.get_spot_price_history(
+                                                 instance_type=instanceType        ,
+                                                 start_time=start_time             ,
+                                                 availability_zone=availabilityZone,
+                                                 product_description=productDescription
+                                            );
+
             return float(prices[0].price);
         except:
             return float('inf');

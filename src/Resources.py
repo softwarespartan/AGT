@@ -635,7 +635,7 @@ def soln_exists(date,expt,org,net='n0'):
     bucket = conn.get_bucket(WL_SOLN_BUCKET);
 
     # construct the relative path to where the file should be
-    relPath = str(date.year)+"/"+str(date.doy)+"/"+expt+"/"+org+"/"+net
+    relPath = date.yyyy()+"/"+date.ddd()+"/"+expt+"/"+org+"/"+net
 
     # construct the name of the sinex file
     fileName = org+str(date.gpsWeek)+str(date.gpsWeekDay)+".snx.gz"
@@ -665,6 +665,3 @@ if __name__ == '__main__':
     exists = soln_exists(date,expt,org,net)
 
     print("file: "+exists[1]+", "+str(exists[0]))
-        
-    
-    

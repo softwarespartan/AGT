@@ -502,6 +502,9 @@ class Session(object):
         
         # add the status field (default unknown)
         status['status'] = None;
+
+        # add the solution field (default unknown)
+        status['solution'] = None;
         
         # return a string since likely going to msg this 
         return status;
