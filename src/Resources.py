@@ -8,13 +8,13 @@ import multiprocessing
 WL_SP3_BUCKET = 'com.widelane.sp3'         ;
 WL_NAV_BUCKET = 'com.widelane.nav'         ;
 WL_RNX_BUCKET = 'rinex'                    ;
-WL_STN_BUCKET = 'com.widelane.station.info';
+#WL_STN_BUCKET = 'com.widelane.station.info';
 WL_APR_BUCKET = 'com.widelane.apr'         ;
 WL_RES_BUCKET = 'com.widelane.resources'   ;
 WL_SOLN_BUCKET= 'com.widelane.solutions'   ;
 
 WL_RNX_BUCKET = 'com.widelane.data'
-#WL_STN_BUCKET = 'com.widelane.data'
+WL_STN_BUCKET = 'com.widelane.data'
 #WL_APR_BUCKET = 'com.widelane.data'
 
 # local dir relative work_dir for resources
@@ -247,60 +247,85 @@ def get_rnx_parallel(year, doy, stn_list, outdir=None):
     # add the rinex file path to the file list
 
     return rnx_file_list;
-        
+
+
 def get_stn_info(year,doy,stn_list,outdir=None):
 
-    if len(stn_list) == 0: return
-    
-    # init
-    file_list = list();
+    year = Utils.get_norm_year_str(year);
+    doy = Utils.get_norm_doy_str(doy);
 
     # init s3 connection to the metadata bucket
     conn = S3Connection(calling_format=OrdinaryCallingFormat());
     bucket = conn.get_bucket(WL_STN_BUCKET);
 
-    list_of_bucket_keys = list()
-    
-    for stnId in stn_list:
-    
-        # parse the station id and extract the 4-char station code
-        (ns,code) = Utils.parse_stnId(stnId);
-        
-        # set outdir to current directory if not set
-        if outdir is None: outdir = '.';
-    
-        # set the file name for the station info
-        stn_info_file_name = '.'.join((ns,code,'station','info'));
-        
-        # next, create the path for the station info file
-        stn_info_file_path = os.path.join(outdir,stn_info_file_name);
+    if outdir is None: outdir = '.';
 
-        bucketKey = bucket.get_key(stn_info_file_name)    ;
-        
-        # let the user know that the file does not exist and continue
-        if bucketKey is None:
-            os.sys.stderr.write('station info resource: '+stnId+' could not be located\n');
-            continue;
-        
-        # create the s3 object
-        bucketKey.key = stn_info_file_name;
+    stn_info_file_name = year+'-'+doy+'.info'
 
-        # enqueue
-        list_of_bucket_keys.append((bucketKey,stn_info_file_path))
+    bucketKey = bucket.get_key(stn_info_file_name);
 
-        # add to list of files
-        file_list.append(stn_info_file_path);
+    # create the s3 object
+    bucketKey.key = stn_info_file_name;
 
-        # pull the file
-        bucketKey.get_contents_to_filename(stn_info_file_path);
+    # generate output path
+    out_file_path = os.path.join(outdir,stn_info_file_name)
 
-    poolsz = min(16, len(file_list))
-    pool = multiprocessing.Pool(poolsz);
-    pool.map(action, list_of_bucket_keys)
-    pool.close()
-    pool.join()
-        
-    return file_list;
+    # pull the file
+    bucketKey.get_contents_to_filename(out_file_path);
+
+# def get_stn_info_info(year,doy,stn_list,outdir=None):
+#
+#     if len(stn_list) == 0: return
+#
+#     # init
+#     file_list = list();
+#
+#     # init s3 connection to the metadata bucket
+#     conn = S3Connection(calling_format=OrdinaryCallingFormat());
+#     bucket = conn.get_bucket(WL_STN_BUCKET);
+#
+#     list_of_bucket_keys = list()
+#
+#     for stnId in stn_list:
+#
+#         # parse the station id and extract the 4-char station code
+#         (ns,code) = Utils.parse_stnId(stnId);
+#
+#         # set outdir to current directory if not set
+#         if outdir is None: outdir = '.';
+#
+#         # set the file name for the station info
+#         stn_info_file_name = '.'.join((ns,code,'station','info'));
+#
+#         # next, create the path for the station info file
+#         stn_info_file_path = os.path.join(outdir,stn_info_file_name);
+#
+#         bucketKey = bucket.get_key(stn_info_file_name)    ;
+#
+#         # let the user know that the file does not exist and continue
+#         if bucketKey is None:
+#             os.sys.stderr.write('station info resource: '+stnId+' could not be located\n');
+#             continue;
+#
+#         # create the s3 object
+#         bucketKey.key = stn_info_file_name;
+#
+#         # enqueue
+#         list_of_bucket_keys.append((bucketKey,stn_info_file_path))
+#
+#         # add to list of files
+#         file_list.append(stn_info_file_path);
+#
+#         # pull the file
+#         bucketKey.get_contents_to_filename(stn_info_file_path);
+#
+#     poolsz = min(16, len(file_list))
+#     pool = multiprocessing.Pool(poolsz);
+#     pool.map(action, list_of_bucket_keys)
+#     pool.close()
+#     pool.join()
+#
+#     return file_list;
         
 def get_apr(year,doy,dns,outdir=None):
     
