@@ -246,6 +246,8 @@ def get_rnx_parallel(year, doy, stn_list, outdir=None):
     return rnx_file_list;
         
 def get_stn_info(year,doy,stn_list,outdir=None):
+
+    if len(stn_list) == 0: return
     
     # init
     file_list = list();
