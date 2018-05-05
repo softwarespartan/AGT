@@ -166,7 +166,7 @@ class Session(Processing.Session):
     def __create_setup_script(self):
         
         year = Utils.get_norm_year_str(self.options['year']);
-        doy  = Utils.get_norm_doy_str( self.options['doy'] );
+        doy  = Utils.get_norm_doy_str (self.options['doy' ]);
         
         setup_file_path = os.path.join(self.work_dir_path,'setup.sh');
         

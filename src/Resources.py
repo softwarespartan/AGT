@@ -13,6 +13,10 @@ WL_APR_BUCKET = 'com.widelane.apr'         ;
 WL_RES_BUCKET = 'com.widelane.resources'   ;
 WL_SOLN_BUCKET= 'com.widelane.solutions'   ;
 
+WL_RNX_BUCKET = 'com.widelane.data'
+#WL_STN_BUCKET = 'com.widelane.data'
+#WL_APR_BUCKET = 'com.widelane.data'
+
 # local dir relative work_dir for resources
 WL_RESOURCES_LOCAL  = 'resources'          ;
     
@@ -120,8 +124,11 @@ def get_rnx(year,doy,stn_list,outdir=None):
     for stnId in stn_list:
     
         # parse the station id and extract the 4-char station code
-        (ns,code) = Utils.parse_stnId(stnId);
-    
+        #(ns,code) = Utils.parse_stnId(stnId);
+
+        # no more namespaces
+        code = stnId;
+
         # create the file name of the sp3
         rnx_file_name = code+doy+'0.'+year[2:]+'d.Z';
         
@@ -132,7 +139,8 @@ def get_rnx(year,doy,stn_list,outdir=None):
         rnx_file_path = os.path.join(outdir,rnx_file_name);
         
         # create key path to file in rnx
-        rnx_key_path = '/'.join([ns,year,doy,rnx_file_name]);
+        #rnx_key_path = '/'.join([ns,year,doy,rnx_file_name]);
+        rnx_key_path = rnx_file_name;
 
         bucketKey = bucket.get_key(rnx_key_path)       ;
         
@@ -141,7 +149,8 @@ def get_rnx(year,doy,stn_list,outdir=None):
             rnx_file_name = code+str(doy)+'1.'+str(year)[2:]+'d.Z';
             
             # create key path to file in s3
-            rnx_key_path = '/'.join([ns,str(year),str(doy),rnx_file_name]);
+            #rnx_key_path = '/'.join([ns,str(year),str(doy),rnx_file_name]);
+            rnx_key_path = rnx_file_name;
             
             # check for session 1 file
             bucketKey = bucket.get_key(rnx_key_path);
@@ -638,7 +647,7 @@ def soln_exists(date,expt,org,net='n0'):
     relPath = date.yyyy()+"/"+date.ddd()+"/"+expt+"/"+org+"/"+net
 
     # construct the name of the sinex file
-    fileName = org+str(date.gpsWeek)+str(date.gpsWeekDay)+".snx.gz"
+    fileName = org+date.wwwwd()+".snx.gz"
 
     # full file path
     fullFilePath = relPath + "/" + fileName
