@@ -175,6 +175,8 @@ def action(params):
 
 def get_rnx_parallel(year, doy, stn_list, outdir=None):
 
+    if len(stn_list) ==0: return
+
     year = Utils.get_norm_year_str(year);
     doy = Utils.get_norm_doy_str(doy);
 
