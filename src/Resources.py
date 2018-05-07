@@ -273,6 +273,8 @@ def get_stn_info(year,doy,stn_list,outdir=None):
     # pull the file
     bucketKey.get_contents_to_filename(out_file_path);
 
+    return out_file_path
+
 # def get_stn_info_info(year,doy,stn_list,outdir=None):
 #
 #     if len(stn_list) == 0: return
@@ -326,38 +328,66 @@ def get_stn_info(year,doy,stn_list,outdir=None):
 #     pool.join()
 #
 #     return file_list;
-        
-def get_apr(year,doy,dns,outdir=None):
-    
+
+
+def get_apr(year,doy,stn_list,outdir=None):
+
     year = Utils.get_norm_year_str(year);
-    doy  = Utils.get_norm_doy_str (doy );
-    
-    # set outdir to current directory if not set
-    if outdir is None: outdir = '.';
-    
-    # set the file name for the station info
-    apr_file_name = '.'.join((dns,year,doy,'apr'));
-    
-    # next, create the path for the station info file
-    apr_file_path = os.path.join(outdir,apr_file_name);
-    
+    doy = Utils.get_norm_doy_str(doy);
+
     # init s3 connection to the metadata bucket
-    conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
-    bucket    = conn.get_bucket(WL_APR_BUCKET)     ;
-    bucketKey = bucket.get_key(apr_file_name)         ;
-    
-    # make sure we're on track here
-    if bucketKey is None:
-            raise ResourceException('could not locate resource: '+apr_file_name);
-    
+    conn = S3Connection(calling_format=OrdinaryCallingFormat());
+    bucket = conn.get_bucket(WL_STN_BUCKET);
+
+    if outdir is None: outdir = '.';
+
+    file_name = year+'-'+doy+'.apr'
+
+    bucketKey = bucket.get_key(file_name);
+
     # create the s3 object
-    bucketKey.key = apr_file_name;  
-    
+    bucketKey.key = file_name;
+
+    # generate output path
+    out_file_path = os.path.join(outdir,file_name)
+
     # pull the file
-    bucketKey.get_contents_to_filename(apr_file_path);
-    
-    # thats a wrap
-    return apr_file_path;
+    bucketKey.get_contents_to_filename(out_file_path);
+
+    return out_file_path
+
+
+# def get_apr(year,doy,dns,outdir=None):
+#
+#     year = Utils.get_norm_year_str(year);
+#     doy  = Utils.get_norm_doy_str (doy );
+#
+#     # set outdir to current directory if not set
+#     if outdir is None: outdir = '.';
+#
+#     # set the file name for the station info
+#     apr_file_name = '.'.join((dns,year,doy,'apr'));
+#
+#     # next, create the path for the station info file
+#     apr_file_path = os.path.join(outdir,apr_file_name);
+#
+#     # init s3 connection to the metadata bucket
+#     conn      = S3Connection(calling_format=OrdinaryCallingFormat())  ;
+#     bucket    = conn.get_bucket(WL_APR_BUCKET)     ;
+#     bucketKey = bucket.get_key(apr_file_name)         ;
+#
+#     # make sure we're on track here
+#     if bucketKey is None:
+#             raise ResourceException('could not locate resource: '+apr_file_name);
+#
+#     # create the s3 object
+#     bucketKey.key = apr_file_name;
+#
+#     # pull the file
+#     bucketKey.get_contents_to_filename(apr_file_path);
+#
+#     # thats a wrap
+#     return apr_file_path;
         
 def get_bin(program,outdir=None):
     

@@ -55,8 +55,13 @@ def wlapr2apr(aprFile):
     except:
         raise GamitException('could not open file '+gamitAprFilePath)
 
+    aprFileName = os.path.basename(aprFile);
+    year = float(aprFileName[0:4])
+    doy  = float(aprFileName[5:8])
+    refEpoch = year + doy/366
+
     # get the reference epoch from the file
-    refEpoch = float(src.readline());
+    #refEpoch = float(src.readline());
 
     # get the lines and populate the files    
     for line in src.readlines():
@@ -79,8 +84,8 @@ def wlapr2apr(aprFile):
             
         try:
             # convert all the input to doubles
-            X    = float(lineParts[1]); Y    = float(lineParts[2]); Z    = float(lineParts[3]);
-            sigE = float(lineParts[7]); sigN = float(lineParts[8]); sigU = float(lineParts[9]);
+            X    = float(lineParts[2]); Y    = float(lineParts[3]); Z    = float(lineParts[4]);
+            sigE = float(lineParts[8]); sigN = float(lineParts[9]); sigU = float(lineParts[10]);
         except:
             os.sys.stderr.write('error parsing APR line: '+ line); continue;
         
