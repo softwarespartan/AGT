@@ -118,8 +118,7 @@ class Session(Processing.Session):
         
         # call super class constructor
         super(Session,self).__init__();
-        
-        
+
     # @Override    
     def initialize(self):
 
@@ -194,12 +193,13 @@ class Session(Processing.Session):
         rm *.tar
         
         # init the station info file
-        echo "*SITE  Station Name      Session Start      Session Stop       Ant Ht   HtCod  Ant N    Ant E    Receiver Type         Vers                  SwVer  Receiver SN           Antenna Type     Dome   Antenna SN " > tables/station.info;
+        #echo "*SITE  Station Name      Session Start      Session Stop       Ant Ht   HtCod  Ant N    Ant E    Receiver Type         Vers                  SwVer  Receiver SN           Antenna Type     Dome   Antenna SN " > tables/station.info;
         #cat resources/*.station.info >> tables/station.info
-        for file in $(ls resources/*.station.info);do 
-            cat $file >> tables/station.info;
-            echo "* ">>tables/station.info;
-        done
+        #for file in $(ls resources/*.station.info);do 
+        #    cat $file >> tables/station.info;
+        #    echo "* ">>tables/station.info;
+        #done
+        cat resources/*.info > tables/station.info
         
         
         # link apr and sigmas
