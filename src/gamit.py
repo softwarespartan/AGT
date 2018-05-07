@@ -185,14 +185,15 @@ class Session(Processing.Session):
         # make sure we can find the program -- put local bin first
         export PATH=`pwd`/bin:${PATH}
         
-        find ./bin | xargs -n1 chmod +x
-        
         # unpack the tar.gz files
         for file in $(ls *.gz);do gunzip $file;done
         for file in $(ls *.tar);do tar -xf  $file;done
         
         # clean up
         rm *.tar
+        
+        # make sure all executables are enabled
+        find ./bin | xargs -n1 chmod +x
         
         # init the station info file
         #echo "*SITE  Station Name      Session Start      Session Stop       Ant Ht   HtCod  Ant N    Ant E    Receiver Type         Vers                  SwVer  Receiver SN           Antenna Type     Dome   Antenna SN " > tables/station.info;
