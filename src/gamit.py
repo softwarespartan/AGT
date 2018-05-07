@@ -73,7 +73,7 @@ def wlapr2apr(aprFile):
         lineParts = re.split('\s+',line);
 
         # defensive check
-        if len(lineParts) != 10:
+        if len(lineParts) != 12:
             os.sys.stderr.write('invalid apr line: '+line+'\n'); continue;
             
         # parse the station id
