@@ -229,8 +229,8 @@ class Session(object):
             
         # make sure that a metadata name space has been 
         # specified and if so that it has been specified correctly
-        if self.options['dns'] is None:
-            raise SessionException('must specify metadata name space using --dns=');
+        #if self.options['dns'] is None:
+        #    raise SessionException('must specify metadata name space using --dns=');
         
         # check that the station list has only unique station id
         if len(self.stn_list) != len(set(self.stn_list)):
