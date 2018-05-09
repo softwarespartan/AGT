@@ -65,11 +65,10 @@ class Session(object):
                        'expt_type'      : 'baseline' ,
                        'minspan'        : 12         ,
                        'should_iterate' : 'yes'      ,
-                       'sp3_type'       : 'ig1'      ,
+                       'sp3_type'       : 'igs'      ,
                        'org'            : 'tmp'      ,
                        'expt'           : 'none'     ,
-                       'network_id'     : 'n0'       ,
-                       'dns'            : 'osf.gamit',
+                       'network_id'     : 'n0'
                        };
                        
         self.work_dir_path = None;

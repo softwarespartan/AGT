@@ -230,7 +230,7 @@ class Session(Processing.Session):
         cd tables
         gunzip *.sp3*;
         sed -e 's@OL/AL:NONE@OL/AL:@g' *.sp3 > tmp;  mv tmp *.sp3
-        sh_sp3fit -f *.sp3 -o file -d %s %s -m 0.1 > sh_sp3fit.out
+        sh_sp3fit -f *.sp3 -gnss G -o file -d %s %s -m 0.1 > sh_sp3fit.out
         cp gfile* ../resources/
         cd ..
         

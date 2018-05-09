@@ -88,34 +88,25 @@ class JobSpecification():
             file_name = os.path.basename(file_path);
                     
             # compute the year and day of year from stn list file
-            if file_name.startswith('stn_list'):
+            if len(re.split('\.',file_name))==5:
                 
-                # init to null
-                year = None; doy = None; net_id = None;
-                
-                # break up the file name based on '.'
-                name_parts = re.split('\.',file_name);
-                            
-                # consider 'stn_list.2010.222'
-                if len(name_parts) == 3:
-                    (junk,year,doy) = name_parts;
-                    
-                # consider 'stn_list.2006.345.n19'
-                if len(name_parts) == 4:
-                    (junk,year,doy,net_id) = name_parts;
-                    
-                if year != None and doy != None:
-                    
-                    # set the year for the job
-                    job['argList'].append('--year='+str(year));
-                    
-                    # set the day of year for the job
-                    job['argList'].append('--doy='+str(doy));
-                    
-                if net_id != None: 
-                    
-                    # set the network id for the job
-                    job['argList'].append('--network_id='+net_id); 
+                # init
+                (org,expt,year,doy,net_id) = re.split('\.',file_name);
+
+                # set the year for the job
+                job['argList'].append('--year=' + str(year));
+
+                # set the day of year for the job
+                job['argList'].append('--doy=' + str(doy));
+
+                # set the network id for the job
+                job['argList'].append('--network_id=' + net_id);
+
+                # set the org arg
+                job['argList'].append('--org='+org);
+
+                # set the expt arg
+                job['argList'].append('--expt='+expt);
                         
         # forward all remaining args from the command line
         for arg in sys_args: job['argList'].append(arg);
@@ -142,7 +133,7 @@ class JobSpecification():
                 net = re.split('=',arg)[1];
                 
         # set the job name
-        job['name'] = '.'.join((expt,org,year,doy));
+        job['name'] = '.'.join((org,expt,year,doy));
         
         # add network id if defined
         if net != None:
