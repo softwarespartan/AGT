@@ -393,7 +393,7 @@ class Session(object):
         self.files['apr'] = Resources.get_apr(                          
                                               self.options['year'    ], 
                                               self.options['doy'     ], 
-                                              self.options['dns'     ], 
+                                              None,
                                               self.get_resources_path() 
                                              );
          
