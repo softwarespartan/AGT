@@ -5,17 +5,14 @@ import re,os,pyDate,Utils;
 
 import multiprocessing
 
-WL_SP3_BUCKET = 'com.widelane.sp3'         ;
-WL_NAV_BUCKET = 'com.widelane.nav'         ;
-WL_RNX_BUCKET = 'rinex'                    ;
-#WL_STN_BUCKET = 'com.widelane.station.info';
-WL_APR_BUCKET = 'com.widelane.apr'         ;
-WL_RES_BUCKET = 'com.widelane.resources'   ;
-WL_SOLN_BUCKET= 'com.widelane.solutions'   ;
+WL_SP3_BUCKET = 'edu.mbevis.osu.data'        ;
+WL_NAV_BUCKET = 'edu.mbevis.osu.data'        ;
+WL_RES_BUCKET = 'edu.mbevis.osu.resources'   ;
+WL_SOLN_BUCKET= 'edu.mbevis.osu.solutions'   ;
 
-WL_RNX_BUCKET = 'com.widelane.data'
-WL_STN_BUCKET = 'com.widelane.data'
-#WL_APR_BUCKET = 'com.widelane.data'
+WL_RNX_BUCKET = 'edu.mbevis.osu.data'
+WL_STN_BUCKET = 'edu.mbevis.osu.data'
+WL_APR_BUCKET = 'edu.mbevis.osu.data'
 
 # local dir relative work_dir for resources
 WL_RESOURCES_LOCAL  = 'resources'          ;

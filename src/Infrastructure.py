@@ -6,9 +6,9 @@ from boto.sqs.message    import Message      ;
 
 import xml.etree.ElementTree as ET;
 
-JOB_QUEUE        = 'com_widelane_jobs'     ;
-ERR_QUEUE        = 'com_widelane_err'      ;
-NODE_STATS_QUEUE = 'com_widelane_nodestats';
+JOB_QUEUE        = 'edu_mbevis_osu_jobs'     ;
+ERR_QUEUE        = 'edu_mbevis_osu_err'      ;
+NODE_STATS_QUEUE = 'edu_mbevis_osu_nodestats';
 
 WORKER_SLEEP_SECONDS   = 30   ;
 STATS_SLEEP_SECONDS    = 60*15;
