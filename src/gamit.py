@@ -8,7 +8,7 @@ Created on Feb 18, 2013
 
 import os, re, glob, gzip, Utils, Processing, Resources, pyDate;
 
-QUEUE = 'com_widelane_jobstats';
+QUEUE = 'edu_mbevis_osu_jobstats';
 
 from boto.sqs.connection import SQSConnection
 from boto.sqs.message    import Message
