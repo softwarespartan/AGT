@@ -28,6 +28,20 @@ class Session(Processing.Session):
         
         # init date object
         date = pyDate.Date(year=year,doy=doy);
+
+        # create date object
+        #self.date = pyDate.Date(year=self.options['year'], doy=self.options['doy'])
+
+        # check for pre-existing solution if lazy
+        (solutionAlreadyExists, key) = Resources.soln_exists(
+            date,
+            self.options['expt'],
+            self.options['org'],
+            self.options['network_id']
+        )
+
+        if solutionAlreadyExists and self.isLazy:
+            raise Processing.LazyException("file exists: " + key)
         
         # make sure we have something specified to work with
         if len(self.src) == 0: 
@@ -39,11 +53,9 @@ class Session(Processing.Session):
          
         # make sure the the temporary directory does not already exist
         if os.path.isdir(self.work_dir_path):
-            raise GlobkException  (                           \
-                                   'temporary work directory '\
-                                   +self.work_dir_path        \
-                                   +' already exists'         \
-                                  );
+            raise GlobkException(
+                'temporary work directory '+self.work_dir_path+' already exists'
+            );
         
         # attempt to create the work directory
         try:
