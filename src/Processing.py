@@ -369,7 +369,7 @@ class Session(object):
         self.files['nav'] = Resources.get_nav(                          
                                               self.options['year'    ], 
                                               self.options['doy'     ], 
-                                              'auto'                  , 
+                                              'brdc'                  ,
                                               self.get_resources_path() 
                                              );
         
