@@ -74,7 +74,8 @@ def get_platform_id():
     uname = os.uname();
     
     # combine to form the platform identification
-    return '.'.join((uname[0],uname[2],uname[4]));
+    #return '.'.join((uname[0],uname[2],uname[4]));
+    return uname[0]
     
     
 def get_processor_count():
